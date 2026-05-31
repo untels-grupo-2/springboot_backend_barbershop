@@ -15,13 +15,13 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/horarioInstancia/")
+@RequestMapping("/horarios-semana")
 @RequiredArgsConstructor
 public class RestControllerHorarioBarberoInstancia {
 
     private final HorarioBarberoInstanciaService horarioBarberoInstanciaService;
 
-    @GetMapping("/actual")
+    @GetMapping
     public ResponseEntity<ApiResponse<Map<String, List<DtoHorarioBarberoInstanciaResponse>>>> obtenerSemanaAgrupada() {
         return ResponseEntity.ok(ApiResponse.succes("Horario Actual:", horarioBarberoInstanciaService.obtenerInstanciasAgrupadasPorDiaSemanaActual()));
     }

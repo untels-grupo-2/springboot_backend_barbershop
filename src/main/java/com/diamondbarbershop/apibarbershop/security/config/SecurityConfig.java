@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -19,8 +20,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -90,6 +92,7 @@ public class SecurityConfig {
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(Customizer.withDefaults())
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 )
@@ -97,47 +100,70 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        .requestMatchers(HttpMethod.POST, "/autenticacion/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/autenticacion/bootstrap/admin").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/email/password").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/autenticacion/reset-password").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/autenticacion/refresh-token").permitAll()
                         .requestMatchers(
-                                "/api/auth/**",
-                                "emailPassword/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/servicio/crear").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/servicio/listar").hasAnyAuthority("ADMIN", "USER")
-                        .requestMatchers(HttpMethod.GET, "/api/servicio/listarId/**").hasAnyAuthority("ADMIN", "USER")
-                        .requestMatchers(HttpMethod.DELETE, "/api/servicio/eliminar/**").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/servicio/actualizar").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/auth/v1/registerAdm").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/auth/register").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/auth/refreshToken").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/logout").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/barbero/crear").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/barbero/listar").hasAnyAuthority("ADMIN", "USER")
-                        .requestMatchers(HttpMethod.GET, "/api/barbero/listarId/**").hasAnyAuthority("ADMIN", "USER")
-                        .requestMatchers(HttpMethod.DELETE, "/api/barbero/eliminar/**").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/barbero/actualizar").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/valoracion/crear").hasAuthority("USER")
-                        .requestMatchers(HttpMethod.GET, "/api/valoracion/listar").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "api/valoracion/responder").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/horarioBarberoBase/actualizarTurnosDia").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/horarioBarberoBase/confirmarHorario").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/horarioInstancia/actual").hasAnyAuthority("ADMIN", "USER")
-                        .requestMatchers(HttpMethod.GET, "/api/rango/listar").hasAnyAuthority("ADMIN", "USER")
-                        .requestMatchers(HttpMethod.GET, "/api/rango/listarId/**").hasAnyAuthority("ADMIN", "USER")
-                        .requestMatchers(HttpMethod.GET, "/api/reportes/horario").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/usuario/listar").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/usuario/listarId/**").hasAnyAuthority("ADMIN", "USER")
-                        .requestMatchers(HttpMethod.PUT, "/api/usuario/actualizar/**").hasAnyAuthority("ADMIN", "USER")
-                        .requestMatchers(HttpMethod.POST, "/api/reserva/crear").hasAuthority("USER")
-                        .requestMatchers(HttpMethod.POST, "/api/reserva/subir-comprobante/**").hasAuthority("USER")
-                        .requestMatchers(HttpMethod.GET, "/api/reserva/admin/listar").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/reserva/admin/cambiar-estado/**").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/reserva/barberos-disponibles").hasAnyAuthority("USER", "ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/reserva/mis-reservas").hasAuthority("USER")
-                        .requestMatchers(HttpMethod.GET, "api/reserva/consultarRecompensa").hasAuthority("USER")
-                        .requestMatchers(HttpMethod.GET, "api/reserva/crearReservaRecompensa").hasAuthority("USER")
+
+                        .requestMatchers(HttpMethod.POST, "/autenticacion/registro/cliente").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/autenticacion/registro/admin").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/autenticacion/logout").authenticated()
+
+                        // Servicios
+                        .requestMatchers(HttpMethod.POST, "/servicios").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/servicios", "/servicios/*").hasAnyAuthority("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.PUT, "/servicios/*").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/servicios/*").hasAuthority("ADMIN")
+
+                        // Barberos
+                        .requestMatchers(HttpMethod.POST, "/barberos").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/barberos", "/barberos/*").hasAnyAuthority("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.PUT, "/barberos/*").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/barberos/*").hasAuthority("ADMIN")
+
+                        // Usuarios
+                        .requestMatchers(HttpMethod.GET, "/usuarios").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/usuarios/me").hasAnyAuthority("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.GET, "/usuarios/*").hasAnyAuthority("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.PUT, "/usuarios/me").hasAnyAuthority("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.PUT, "/usuarios/*").hasAnyAuthority("ADMIN", "USER")
+
+                        // Valoraciones
+                        .requestMatchers(HttpMethod.POST, "/valoraciones").hasAuthority("USER")
+                        .requestMatchers(HttpMethod.GET, "/valoraciones").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/valoraciones/*/estado").hasAuthority("ADMIN")
+
+                        // Horarios base
+                        .requestMatchers(HttpMethod.PUT, "/horarios-base").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/horarios-base/confirmacion").hasAuthority("ADMIN")
+
+                        // Horarios semana
+                        .requestMatchers(HttpMethod.GET, "/horarios-semana").hasAnyAuthority("ADMIN", "USER")
+
+                        // Rangos horario
+                        .requestMatchers(HttpMethod.GET, "/rangos-horario", "/rangos-horario/*").hasAnyAuthority("ADMIN", "USER")
+
+                        // Reporte horarios
+                        .requestMatchers(HttpMethod.GET, "/reporte/horarios").hasAuthority("ADMIN")
+
+                        // Reservas
+                        .requestMatchers(HttpMethod.POST, "/reservas").hasAuthority("USER")
+                        .requestMatchers(HttpMethod.GET, "/reservas/barberos-disponibles").hasAnyAuthority("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.POST, "/reservas/*/comprobante").hasAuthority("USER")
+                        .requestMatchers(HttpMethod.GET, "/reservas/admin").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/reservas/*/estado").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/reservas/mis-reservas").hasAuthority("USER")
+                        .requestMatchers(HttpMethod.GET, "/reservas/recompensa/estado").hasAuthority("USER")
+                        .requestMatchers(HttpMethod.POST, "/reservas/recompensa").hasAuthority("USER")
+                        .requestMatchers(HttpMethod.GET, "/reservas/reportes").hasAuthority("ADMIN")
                         .anyRequest().authenticated()
                 )
                 // OAuth2 Resource Server reemplaza al JwtAuthenticationFilter manual.
@@ -151,5 +177,18 @@ public class SecurityConfig {
                 );
         // Ya NO hay http.addFilterBefore(jwtAuthenticationFilter(), ...)
         return http.build();
+    }
+
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of("http://localhost:5173"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        config.setAllowCredentials(false); // JWT por header, normalmente false
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 }

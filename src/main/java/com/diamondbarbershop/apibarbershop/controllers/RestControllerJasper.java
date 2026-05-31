@@ -15,12 +15,12 @@ import java.sql.Date;
 import java.time.LocalDate;
 
 @RestController
-@RequestMapping("api/reportes/")
+@RequestMapping
 @RequiredArgsConstructor
 public class RestControllerJasper {
     private final JasperService jasperService;
 
-    @GetMapping("horario")
+    @GetMapping("/reporte/horarios")
     public ResponseEntity<byte[]> exportarHorarioPdf(
             @RequestParam("fechaInicio") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
             @RequestParam("fechaFin") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin
