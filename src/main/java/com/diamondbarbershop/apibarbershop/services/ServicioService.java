@@ -2,6 +2,7 @@ package com.diamondbarbershop.apibarbershop.services;
 
 import com.diamondbarbershop.apibarbershop.cloudinaryImages.service.CloudinaryService;
 import com.diamondbarbershop.apibarbershop.dtos.servicio.request.DtoServicio;
+import com.diamondbarbershop.apibarbershop.dtos.servicio.request.DtoTipoServicio;
 import com.diamondbarbershop.apibarbershop.dtos.servicio.response.DtoServicioResponse;
 import com.diamondbarbershop.apibarbershop.exceptions.ServicioNoEncontradoException;
 import com.diamondbarbershop.apibarbershop.exceptions.UsuarioExistenteException;
@@ -79,5 +80,13 @@ public class ServicioService {
                 .orElseThrow(() -> new ServicioNoEncontradoException("No se puede eliminar. ServicioEntity no encontrado con Id: " + id));
         servicioEntity.setEstado(0);
         servicioRepo.save(servicioEntity);
+    }
+
+    public List<DtoTipoServicio> listarTipoServicio() {
+        List<TipoServicio> tipoServicio = tipoServicioRepository.findAll().stream().toList();
+        return tipoServicio.stream().map(tipo -> new DtoTipoServicio(
+                tipo.getTipoServicio_id(),
+                tipo.getNombre()
+        )).toList();
     }
 }

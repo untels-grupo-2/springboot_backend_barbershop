@@ -122,6 +122,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/servicios", "/servicios/*").hasAnyAuthority("ADMIN", "USER")
                         .requestMatchers(HttpMethod.PUT, "/servicios/*").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/servicios/*").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/servicios/tipos").hasAuthority("ADMIN")
 
                         // Barberos
                         .requestMatchers(HttpMethod.POST, "/barberos").hasAuthority("ADMIN")
@@ -182,7 +183,7 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173"));
+        config.setAllowedOrigins(List.of("http://localhost:5173","http://localhost:5174"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         config.setAllowCredentials(false); // JWT por header, normalmente false

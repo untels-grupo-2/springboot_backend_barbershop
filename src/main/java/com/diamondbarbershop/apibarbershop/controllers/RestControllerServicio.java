@@ -2,6 +2,7 @@ package com.diamondbarbershop.apibarbershop.controllers;
 
 import com.diamondbarbershop.apibarbershop.dtos.common.ApiResponse;
 import com.diamondbarbershop.apibarbershop.dtos.servicio.request.DtoServicio;
+import com.diamondbarbershop.apibarbershop.dtos.servicio.request.DtoTipoServicio;
 import com.diamondbarbershop.apibarbershop.dtos.servicio.response.DtoServicioResponse;
 import com.diamondbarbershop.apibarbershop.exceptions.ImagenNoSubidaException;
 import com.diamondbarbershop.apibarbershop.services.ServicioService;
@@ -63,5 +64,12 @@ public class RestControllerServicio {
     public ResponseEntity<ApiResponse<Object>> eliminarServicio(@PathVariable Long id) {
         servicioService.deshabilitar(id);
         return ResponseEntity.ok(ApiResponse.succes("Servicio Eliminado exitosamente",null));
+    }
+
+    @GetMapping("/tipos")
+    public ResponseEntity<ApiResponse<List<DtoTipoServicio>>> listarTipoServicio() {
+        return ResponseEntity
+                .ok(ApiResponse
+                        .succes("Lista de tipo de servicios enviada correctamente", servicioService.listarTipoServicio()));
     }
 }
