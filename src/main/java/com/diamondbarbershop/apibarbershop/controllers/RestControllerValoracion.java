@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/valoracion/")
+@RequestMapping("/valoraciones")
 @RequiredArgsConstructor
 public class RestControllerValoracion {
 
     private final ValoracionService valoracionService;
 
-    @PostMapping(value = "crear", headers = "Accept=application/json")
+    @PostMapping
     public ResponseEntity<ApiResponse<Object>> crearValoracion(@RequestBody @Valid DtoValoracion dtoValoracion, Authentication authentication) {
         valoracionService.crear(dtoValoracion,authentication);
         return ResponseEntity.status(HttpStatus.CREATED).body(
@@ -28,15 +28,15 @@ public class RestControllerValoracion {
         );
     }
 
-    @GetMapping(value = "listar", headers = "Accept=application/json")
+    @GetMapping
     public ResponseEntity<ApiResponse<List<DtoValoracionResponse>>> listarValoracion() {
         List<DtoValoracionResponse> valoraciones = valoracionService.listarValoraciones();
         return ResponseEntity.ok(ApiResponse.succes("Lista de valoraciones obtenida correctamente",valoraciones));
     }
 
-    @GetMapping(value = "responder/{valoracionId}", headers = "Accept=application/json")
-    public ResponseEntity<ApiResponse<Object>> cambiarEstado(@PathVariable Long valoracionId) {
-        valoracionService.cambiarEstado(valoracionId);
+    @PatchMapping("/{id}/estado")
+    public ResponseEntity<ApiResponse<Object>> cambiarEstado(@PathVariable Long id) {
+        valoracionService.cambiarEstado(id);
         return ResponseEntity.ok(ApiResponse.succes("Valoración respondida", null));
     }
 }

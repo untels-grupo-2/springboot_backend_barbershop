@@ -20,23 +20,21 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/auth/")
+@RequestMapping("/autenticacion")
 @RequiredArgsConstructor
 public class RestControllerAuth {
 
     private final AuthService authService;
 
-    @PostMapping("register")
+    @PostMapping("/registro/cliente")
     public ResponseEntity<ApiResponse<Object>> registrar(@RequestBody DtoRegistro dtoRegistro, Authentication authentication){
 
-        // Validar que el usuario autenticado tenga el rol ADMIN
         if (authentication.getAuthorities().stream().noneMatch(auth ->auth.getAuthority().equals("ADMIN"))){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     new ApiResponse<>(HttpStatus.FORBIDDEN.value(), "Acceso denegado: Solo los administradores pueden registrar usuarios", null)
             );
         }
         try {
-            //Delegamos lógica al servicio
             authService.registrarUsuario(dtoRegistro);
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ApiResponse<>(HttpStatus.OK.value(), "Registro de usuario cliente exitoso", null)
@@ -49,7 +47,7 @@ public class RestControllerAuth {
     }
 
 
-    @PostMapping("v1/registerAdm")
+    @PostMapping("/registro/admin")
     public ResponseEntity<ApiResponse<Object>> registrarAdmin(@RequestBody DtoRegistro dtoRegistro, Authentication authentication ) {
 
         if (authentication.getAuthorities().stream().noneMatch(auth -> auth.getAuthority().equals("ADMIN"))) {
@@ -58,7 +56,6 @@ public class RestControllerAuth {
             );
         }
         try {
-            //Delegamos lógica al servicio
             authService.registrarAdministrador(dtoRegistro);
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ApiResponse<>(HttpStatus.OK.value(), "Registro de usuario administrador exitoso", null)
@@ -71,10 +68,9 @@ public class RestControllerAuth {
 
     }
 
-    @PostMapping("v2/registerAdm")
+    @PostMapping("/bootstrap/admin")
     public ResponseEntity<ApiResponse<Object>> registrarAdmin2(@RequestBody DtoRegistro dtoRegistro, Authentication authentication ) {
         try {
-            //Delegamos lógica al servicio
             authService.registrarAdministrador(dtoRegistro);
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ApiResponse<>(HttpStatus.OK.value(), "Registro de usuario administrador exitoso", null)
@@ -87,20 +83,19 @@ public class RestControllerAuth {
 
     }
 
-    @PostMapping("login")
+    @PostMapping("/login")
     public ResponseEntity<ApiResponse<Object>> login(@RequestBody @Valid DtoLogin dtoLogin) {
         try {
             DtoLoginResponse dtoLoginResponse = authService.login(dtoLogin);
             return ResponseEntity.ok(ApiResponse.succes("Inicio de sesión existoso", dtoLoginResponse));
         } catch (Exception e) {
-            // Manejar errores de autenticación
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse
                     .error("Credenciales Inválidas",null) );
         }
     }
 
 
-    @PostMapping("resetPassword")
+    @PostMapping("/reset-password")
     public ResponseEntity<ApiResponse<Object>> resetPassword(@RequestBody @Valid DtoResetPassword dtoResetPassword){
         authService.resetPassword(dtoResetPassword);
         return ResponseEntity.status(HttpStatus.OK).body(
@@ -108,7 +103,7 @@ public class RestControllerAuth {
         );
     }
 
-    @PostMapping("refreshToken")
+    @PostMapping("/refresh-token")
     public ResponseEntity<ApiResponse<Object>> refreshToken(@RequestBody @Valid DtoRefreshToken dtoRefreshToken){
         String newToken = authService.renovarToken(dtoRefreshToken);
         String newRefreshToken = authService.renovarRefreshToken(dtoRefreshToken.getRefreshToken());
@@ -120,7 +115,7 @@ public class RestControllerAuth {
         );
     }
 
-    @PostMapping("logout")
+    @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Object>> logout(Authentication authentication) {
         String username = authentication.getName();
         authService.logout(username);

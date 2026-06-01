@@ -18,12 +18,12 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/barbero/")
+@RequestMapping("/barberos")
 @RequiredArgsConstructor
 public class RestControllerBarbero {
     private final BarberoService barberoService;
 
-    @PostMapping(value = "crear", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<Object>> crearBarbero(@RequestPart("dtoBarbero") @Valid DtoBarbero dtoBarbero,
                                                             @RequestPart(value="imagen",required = false) MultipartFile imagen) {
         if (imagen != null &&
@@ -37,19 +37,19 @@ public class RestControllerBarbero {
         );
     }
 
-    @GetMapping(value = "listar", headers = "Accept=application/json")
+    @GetMapping
     public ResponseEntity<ApiResponse<List<DtoBarberoResponse>>> listarBarbero() {
                 List<DtoBarberoResponse> barberos = barberoService.readAll();
         return ResponseEntity.ok(ApiResponse.succes("Lista de barberos obtenida correctamente",barberos));
     }
 
-    @GetMapping(value = "listarId/{id}", headers = "Accept=application/json")
+    @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<DtoBarberoResponse>> obtenerBarberoPorId(@PathVariable Long id) {
         DtoBarberoResponse dtoBarberoResponse = barberoService.readOne(id);
         return ResponseEntity.ok(ApiResponse.succes("Barbero encontrado",dtoBarberoResponse));
     }
 
-    @PutMapping(value = "actualizar/{id}", headers = "Accept=application/json")
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<Object>> actualizarBarbero(@PathVariable Long id,@RequestPart @Valid DtoBarbero dtoBarbero,
                                                                  @RequestPart (value = "imagen", required = false) MultipartFile imagen) {
         if (imagen != null &&
@@ -62,7 +62,7 @@ public class RestControllerBarbero {
         return ResponseEntity.ok(ApiResponse.succes("Barbero Actualizado exitosamente",dtoResponse));
     }
 
-    @DeleteMapping(value = "eliminar/{id}", headers = "Accept=application/json")
+    @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Object>> eliminarBarbero(@PathVariable Long id) {
         barberoService.deshabilitar(id);
         return ResponseEntity.ok(ApiResponse.succes("Barbero Deshabilitado exitosamente",null));

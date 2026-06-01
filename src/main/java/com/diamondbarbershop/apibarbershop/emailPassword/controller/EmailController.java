@@ -9,14 +9,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/emailPassword/")
+@RequestMapping("/email")
 @RequiredArgsConstructor
 @CrossOrigin
 public class EmailController {
 
     private final EmailService emailService;
 
-    @PostMapping("sendEmail")
+    @PostMapping("password")
     public ResponseEntity<ApiResponse<Object>> sendEmail(@RequestBody EmailDto emaildto){
         emailService.procesarEnvioCorreo(emaildto);
         return ResponseEntity.status(HttpStatus.OK).body(

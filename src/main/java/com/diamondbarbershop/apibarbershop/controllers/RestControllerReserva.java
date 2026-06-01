@@ -25,19 +25,17 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/reserva/")
+@RequestMapping("/reservas")
 @RequiredArgsConstructor
 public class RestControllerReserva {
 
     private final CrearReservaUseCase crearReservaUseCase;
     private final GestionarReservaUseCase gestionarReservaUseCase;
-
     private final IUsuariosRepository usuariosRepository;
     private final IServicioRepository servicioRepository;
-
     private final ReservaService reservaService;
 
-    @GetMapping("barberos-disponibles")
+    @GetMapping("/barberos-disponibles")
     public ResponseEntity<ApiResponse<List<DtoBarberoDisponible>>> listarBarberosDisponibles(
             @RequestParam("fecha") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha,
             @RequestParam("tipoHorarioId") Long tipoHorarioId,
@@ -46,12 +44,12 @@ public class RestControllerReserva {
         return ResponseEntity.ok(ApiResponse.succes("Lista de barberos disponibles",barberos));
     }
 
-    @PostMapping("crear")
+    @PostMapping
     public ResponseEntity<ApiResponse<Object>> crearReserva(
             @RequestBody DtoReserva dto,
             Authentication authentication) {
-        // El controller resuelve clienteId y precio antes de construir el comando
 
+        // El controller resuelve clienteId y precio antes de construir el comando
         Usuario usuario = usuariosRepository.findByUsername(authentication.getName())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         ServicioEntity servicioEntity = servicioRepository.findById(dto.getServicioId())
@@ -71,16 +69,16 @@ public class RestControllerReserva {
                 .body(ApiResponse.succes("Reserva creada correctamente", null));
     }
 
-    @PostMapping("subir-comprobante/{reservaId}")
+    @PostMapping("/{id}/comprobante")
     public ResponseEntity<ApiResponse<Object>> subirComprobante(
-            @PathVariable Long reservaId,
+            @PathVariable Long id,
             @RequestPart("imagen") MultipartFile imagen,
             Authentication authentication) {
-        reservaService.subirComprobante(reservaId, imagen, authentication);
+        reservaService.subirComprobante(id, imagen, authentication);
         return ResponseEntity.ok(ApiResponse.succes("Comprobante subido", null));
     }
 
-    @GetMapping("admin/listar")
+    @GetMapping("/admin")
     public ResponseEntity<ApiResponse<List<DtoReservaResponse>>> listarReservas(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha,
             @RequestParam(required = false) EstadoReserva estado,
@@ -90,36 +88,36 @@ public class RestControllerReserva {
     }
 
 
-    @PutMapping("admin/cambiar-estado/{reservaId}")
+    @PutMapping("/{id}/estado")
     public ResponseEntity<ApiResponse<Object>> cambiarEstado(
-            @PathVariable Long reservaId,
+            @PathVariable Long id,
             @RequestParam("estado") EstadoReserva estado,
             @RequestParam(value = "motivoDescripcion", required = false) String motivoDescripcion) {
         // El use case encapsula la transición — el dominio valida que sea un estado válido
         switch (estado) {
-            case CONFIRMADA -> gestionarReservaUseCase.confirmar(reservaId);
-            case REALIZADA  -> gestionarReservaUseCase.marcarComoRealizada(reservaId);
-            case CANCELADA  -> gestionarReservaUseCase.cancelar(reservaId, motivoDescripcion);
-            default -> reservaService.cambiarEstado(reservaId, estado, motivoDescripcion);
+            case CONFIRMADA -> gestionarReservaUseCase.confirmar(id);
+            case REALIZADA  -> gestionarReservaUseCase.marcarComoRealizada(id);
+            case CANCELADA  -> gestionarReservaUseCase.cancelar(id, motivoDescripcion);
+            default -> reservaService.cambiarEstado(id, estado, motivoDescripcion);
         }
 
         return ResponseEntity.ok(ApiResponse.succes("Estado actualizado", null));
     }
 
 
-    @GetMapping("mis-reservas")
+    @GetMapping("/mis-reservas")
     public ResponseEntity<ApiResponse<List<DtoReservaResponse>>> listarMisReservas(Authentication authentication) {
         List<DtoReservaResponse> reservas = reservaService.listarReservasPorUsuario(authentication);
         return ResponseEntity.ok(ApiResponse.succes("Lista de mis reservas",reservas));
     }
 
-    @GetMapping("consultarRecompensa")
+    @GetMapping("/recompensa/estado")
     public ResponseEntity<ApiResponse<Boolean>> consultarRecompensa(Authentication authentication) {
         Boolean estado = reservaService.buscarReservasRecompensa(authentication);
         return ResponseEntity.ok(ApiResponse.succes("Estado enviado",estado));
     }
 
-    @PostMapping("crearReservaRecompensa")
+    @PostMapping("/recompensa")
     public ResponseEntity<ApiResponse<Object>> crearReservaRecompensa(
             @RequestBody DtoReserva dto,
             Authentication authentication) {
@@ -127,7 +125,7 @@ public class RestControllerReserva {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.succes("Reserva creada correctamente", null));
     }
 
-    @GetMapping(value = "obtenerReportes", headers = "Accept=application/json")
+    @GetMapping("/reportes")
     public ResponseEntity<ApiResponse<DtoReporteResponse>> obtenerReportes(
             @RequestParam LocalDate fechaInicio,
             @RequestParam LocalDate fechaFin,

@@ -84,7 +84,7 @@ public class HorarioBarberoBaseService {
         LocalDate proximoLunes = obtenerProximoLunes();
         LocalDate proximoDomingo = proximoLunes.plusDays(6);
 
-        // 🧹 Elimina horarios de la próxima semana antes de insertar
+        // Elimina horarios de la próxima semana antes de insertar
         horarioBarberoInstanciaRepository.deleteByFechaBetween(proximoLunes, proximoDomingo);
 
         List<HorarioBarberoBase> baseActivos = horarioBarberoBaseRepository.findAll()

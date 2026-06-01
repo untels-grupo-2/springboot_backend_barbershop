@@ -1,6 +1,9 @@
 spring:
   profiles:
     active: ${SPRING_PROFILE:local}
+  mvc:
+    servlet:
+      path: /api
 
 mail:
   urlFront: ${MAIL_URL_FRONT:http://localhost:4200/reset-password}

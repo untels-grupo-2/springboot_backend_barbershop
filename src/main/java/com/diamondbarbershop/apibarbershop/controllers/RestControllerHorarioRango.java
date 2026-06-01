@@ -15,20 +15,19 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/rango/")
+@RequestMapping("/rangos-horario")
 @RequiredArgsConstructor
 public class RestControllerHorarioRango {
 
     private final HorarioRangoService horarioRangoService;
 
-    @GetMapping(value = "listar", headers = "Accept=application/json")
+    @GetMapping
     public ResponseEntity<ApiResponse<List<DtoHorarioRangoResponse>>> listarRangos() {
         List<DtoHorarioRangoResponse> dtoHorarioRangoResponses = horarioRangoService.readAll();
         return ResponseEntity.ok(ApiResponse.succes("Lista de rangos obtenida correctamente",dtoHorarioRangoResponses));
     }
 
-    //Petición para obtener servicio mediante "ID"
-    @GetMapping(value = "listarId/{id}", headers = "Accept=application/json")
+    @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<DtoHorarioRangoResponse>> obtenerRangoPorId(@PathVariable Long id) {
         DtoHorarioRangoResponse dtoRango = horarioRangoService.readOne(id);
         return ResponseEntity.ok(ApiResponse.succes("Rango encontrado",dtoRango));
