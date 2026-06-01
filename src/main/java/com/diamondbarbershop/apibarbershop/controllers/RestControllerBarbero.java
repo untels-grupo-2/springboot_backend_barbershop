@@ -21,6 +21,7 @@ import java.util.List;
 @RequestMapping("/barberos")
 @RequiredArgsConstructor
 public class RestControllerBarbero {
+
     private final BarberoService barberoService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

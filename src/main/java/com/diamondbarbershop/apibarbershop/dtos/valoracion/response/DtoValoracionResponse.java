@@ -11,4 +11,5 @@ public class DtoValoracionResponse {
     private Boolean util;
     private String mensaje;
     private String usuario_nombre;
+    private Integer estado;
 }
