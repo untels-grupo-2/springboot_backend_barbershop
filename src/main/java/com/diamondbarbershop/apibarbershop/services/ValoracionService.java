@@ -39,7 +39,6 @@ public class ValoracionService {
 
     public List<DtoValoracionResponse> listarValoraciones() {
         List<ValoracionEntity> valoracionEntities = valoracionRepository.findAll().stream()
-                .filter(valoracionEntity -> valoracionEntity.getEstado() == 1)
                 .toList();
         return valoracionEntityMapper.toDtoList(valoracionEntities);
     }
