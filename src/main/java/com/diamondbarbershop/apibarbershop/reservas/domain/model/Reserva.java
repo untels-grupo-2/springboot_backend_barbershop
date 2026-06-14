@@ -81,6 +81,13 @@ public class Reserva {
      *   - Registra el timestamp de creación.
      *   - Emite el evento ReservaCreada.
      * Un constructor no puede expresar esa intención tan claramente.
+     *
+     * Parámetro usaRecompensa (PB-11 Strategy):
+     *   Indica si esta reserva se está creando consumiendo la recompensa de fidelidad
+     *   del cliente. El monto ya viene calculado en el Value Object Precio (0 si es
+     *   con recompensa, precio del servicio si es normal) — el agregado solo necesita
+     *   saberlo para marcar estRecompensa = 1, que el resto del sistema usa como
+     *   indicador de que esta reserva fue una recompensa consumida.
      */
     public static Reserva crear(
             Long barberoId,
@@ -89,7 +96,8 @@ public class Reserva {
             Long horarioRangoId,
             Precio precio,
             LocalDate fechaReserva,
-            String adicionales
+            String adicionales,
+            boolean usaRecompensa
     ) {
         // Invariante de negocio: no se reservan fechas pasadas
         if (fechaReserva.isBefore(LocalDate.now())) {
@@ -108,7 +116,7 @@ public class Reserva {
         reserva.fechaCreacion   = LocalDateTime.now();
         reserva.fechaReserva    = fechaReserva;
         reserva.adicionales     = adicionales;
-        reserva.estRecompensa   = 0;
+        reserva.estRecompensa   = usaRecompensa ? 1 : 0;
 
         // El aggregate emite el evento — no lo publica directamente.
         // Quien lo publica es el Application Service, después del save exitoso.

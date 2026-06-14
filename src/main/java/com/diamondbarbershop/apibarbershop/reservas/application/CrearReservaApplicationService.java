@@ -1,6 +1,8 @@
 package com.diamondbarbershop.apibarbershop.reservas.application;
 
 import com.diamondbarbershop.apibarbershop.reservas.application.chain.ValidacionReservaHandler;
+import com.diamondbarbershop.apibarbershop.reservas.application.strategy.MontoCalculoStrategy;
+import com.diamondbarbershop.apibarbershop.reservas.application.strategy.MontoCalculoStrategySelector;
 import com.diamondbarbershop.apibarbershop.reservas.domain.model.Precio;
 import com.diamondbarbershop.apibarbershop.reservas.domain.model.Reserva;
 import com.diamondbarbershop.apibarbershop.reservas.domain.port.in.CrearReservaUseCase;
@@ -15,15 +17,12 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * Application Service — orquesta el flujo sin tener lógica de negocio propia.
  *
- * Después del refactor de PB-15 (Chain of Responsibility), este servicio
- * delega TODAS las validaciones de pre-condición a la cadena inyectada.
- * Aquí solo queda la secuencia: validar → crear (dominio) → persistir → publicar.
- *
  * Responsabilidades:
  *   1. Disparar la cadena de validaciones (Chain of Responsibility — PB-15).
- *   2. Delegar la creación al aggregate Reserva.crear().
- *   3. Persistir a través del puerto ReservaRepository.
- *   4. Publicar los Domain Events emitidos por el aggregate.
+ *   2. Seleccionar y aplicar la estrategia de cálculo del monto (Strategy — PB-11).
+ *   3. Delegar la creación al aggregate Reserva.crear() con el monto calculado.
+ *   4. Persistir a través del puerto ReservaRepository.
+ *   5. Publicar los Domain Events emitidos por el aggregate.
  */
 @Service
 @RequiredArgsConstructor
@@ -33,11 +32,15 @@ public class CrearReservaApplicationService implements CrearReservaUseCase {
 
     /**
      * Cabeza de la cadena de validaciones — definida como @Bean en
-     * CadenaValidacionReservaConfig. Es el único bean de su tipo en el contexto,
-     * los handlers concretos NO son @Component (se construyen con new dentro
-     * del @Bean), por eso no hace falta @Qualifier.
+     * CadenaValidacionReservaConfig.
      */
     private final ValidacionReservaHandler cadenaValidacion;
+
+    /**
+     * Selector que decide qué estrategia de cálculo de monto aplicar
+     * (estándar o fidelidad, por ahora).
+     */
+    private final MontoCalculoStrategySelector montoCalculoStrategySelector;
 
     @Override
     @Transactional
@@ -45,25 +48,38 @@ public class CrearReservaApplicationService implements CrearReservaUseCase {
 
         // 1. Disparar la cadena de validaciones (PB-15).
         //    Si cualquier handler falla, lanza ReservaValidacionException
-        //    y la ejecución termina aquí — no llegamos a crear ni a persistir.
+        //    y la ejecución termina aquí.
         cadenaValidacion.validar(command);
 
-        // 2. El dominio crea el aggregate con sus invariantes y emite el evento.
+        // 2. Aplicar Strategy de cálculo del monto (PB-11).
+        //    El selector decide según el flag command.usarRecompensa().
+        //    El monto resultante es el que se persiste, no command.precioServicio().
+        MontoCalculoStrategy strategy = montoCalculoStrategySelector.seleccionar(command);
+        Long montoFinal = strategy.calcular(command);
+
+        // 3. El dominio crea el aggregate con sus invariantes y emite el evento.
+        //    El Precio recibido ya viene calculado por la strategy (puede ser 0
+        //    si se usa recompensa).
         Reserva reserva = Reserva.crear(
                 command.barberoId(),
                 command.clienteId(),
                 command.servicioId(),
                 command.horarioRangoId(),
-                new Precio(command.precioServicio()),
+                new Precio(montoFinal),
                 command.fechaReserva(),
-                command.adicionales()
+                command.adicionales(),
+                command.usarRecompensa()
         );
 
-        // 3. Persistir a través del puerto (no del JPA directamente).
+        // 4. Persistir a través del puerto (no del JPA directamente).
         Reserva guardada = reservaRepository.save(reserva);
 
-        // 4. Publicar eventos emitidos por el aggregate.
+        // 5. Publicar eventos emitidos por el aggregate.
         //    Por ahora solo log — en PB-13 conectaremos el publisher real.
+        //    TODO PB-13: cuando se use recompensa, un RecompensaListener debería
+        //    "consumir" las 7 reservas anteriores marcándolas con estRecompensa = 1.
+        //    Eso es un efecto secundario del evento ReservaCreada cuando
+        //    usaRecompensa == true.
         guardada.pullEvents().forEach(
                 event -> System.out.println("[Domain event emitido] "
                         + event.getClass().getSimpleName()));
