@@ -1,0 +1,42 @@
+package com.diamondbarbershop.apibarbershop.catalogo.infrastructure.adapter;
+
+import com.diamondbarbershop.apibarbershop.models.ServicioEntity;
+import com.diamondbarbershop.apibarbershop.repositories.IServicioRepository;
+import com.diamondbarbershop.apibarbershop.reservas.domain.port.out.CatalogoFacade;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+import java.util.Optional;
+
+/**
+ * Implementación de CatalogoFacade — vive en el BC Catálogo.
+ *
+ * El BC Reservas pide servicios vía la interfaz CatalogoFacade (puerto).
+ * Esta clase es la única en todo el sistema que conoce los detalles internos
+ * del BC Catálogo (entidad JPA ServicioEntity, repositorio IServicioRepository).
+ *
+ * NOTA TRANSITORIA:
+ *   Hoy esta clase consume el repositorio JPA legacy del BC Catálogo
+ *   (IServicioRepository). Cuando se complete la migración hexagonal de
+ *   Catálogo en un Sprint futuro, esta Facade leerá del nuevo
+ *   ServicioRepository (puerto de salida del BC Catálogo) en lugar de la
+ *   capa JPA directamente. La interfaz CatalogoFacade no cambia.
+ */
+@Component
+@RequiredArgsConstructor
+public class CatalogoFacadeImpl implements CatalogoFacade {
+
+    private final IServicioRepository servicioRepository;
+
+    @Override
+    public boolean existeServicio(Long servicioId) {
+        return servicioRepository.findById(servicioId).isPresent();
+    }
+
+    @Override
+    public boolean estaActivoServicio(Long servicioId) {
+        Optional<ServicioEntity> servicio = servicioRepository.findById(servicioId);
+        return servicio.isPresent()
+                && Integer.valueOf(1).equals(servicio.get().getEstado());
+    }
+}
