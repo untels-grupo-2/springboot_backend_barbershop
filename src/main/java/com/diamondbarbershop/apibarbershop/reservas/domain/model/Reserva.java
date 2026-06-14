@@ -124,10 +124,30 @@ public class Reserva {
                 null,           // id aún no asignado (viene del repositorio)
                 barberoId, clienteId, servicioId,
                 fechaReserva, horarioRangoId,
+                usaRecompensa,
                 LocalDateTime.now()
         ));
 
         return reserva;
+    }
+
+    /**
+     * Marca esta reserva como "consumida" por el sistema de recompensas (PB-13).
+     *
+     * Cuando un cliente usa su recompensa de fidelidad para reservar gratis,
+     * el sistema debe marcar las 7 reservas que acumuló como "ya consumidas"
+     * para que no las pueda volver a usar. Eso lo dispara RecompensaListener
+     * cuando recibe un ReservaCreada con usaRecompensa = true.
+     *
+     * No es setter público de estRecompensa: es lógica de negocio con nombre
+     * descriptivo. Los setters públicos romperían la integridad del aggregate.
+     */
+    public void consumirParaRecompensa() {
+        if (this.estRecompensa != null && this.estRecompensa == 1) {
+            // Ya estaba marcada — no-op, mantiene idempotencia.
+            return;
+        }
+        this.estRecompensa = 1;
     }
 
     // ── Transiciones de estado (el núcleo del negocio) ─────────────────────────

@@ -1,5 +1,6 @@
 package com.diamondbarbershop.apibarbershop.reservas.application;
 
+import com.diamondbarbershop.apibarbershop.reservas.application.event.ReservaDomainEventPublisher;
 import com.diamondbarbershop.apibarbershop.reservas.domain.model.Reserva;
 import com.diamondbarbershop.apibarbershop.reservas.domain.port.in.GestionarReservaUseCase;
 import com.diamondbarbershop.apibarbershop.reservas.domain.port.out.ReservaRepository;
@@ -13,12 +14,19 @@ import org.springframework.transaction.annotation.Transactional;
  * Patrón: el Application Service carga el aggregate, delega la lógica
  * al dominio y persiste el resultado.
  * Nunca pone lógica de negocio aquí — eso es responsabilidad del aggregate.
+ *
+ * Después del refactor de PB-13 (Observer), publica los Domain Events
+ * emitidos por el aggregate a través de ReservaDomainEventPublisher.
+ * Los listeners reaccionan automáticamente:
+ *   - (Futuro) NotificacionEmailClienteListener (PB-39) → email al cliente
+ *     cuando confirmar/cancelar emiten sus eventos.
  */
 @Service
 @RequiredArgsConstructor
 public class GestionarReservaApplicationService implements GestionarReservaUseCase {
 
     private final ReservaRepository reservaRepository;
+    private final ReservaDomainEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -29,7 +37,7 @@ public class GestionarReservaApplicationService implements GestionarReservaUseCa
         reserva.confirmar();
 
         Reserva guardada = reservaRepository.save(reserva);
-        publicarEventos(guardada);
+        eventPublisher.publicar(guardada.pullEvents());
     }
 
     @Override
@@ -41,7 +49,7 @@ public class GestionarReservaApplicationService implements GestionarReservaUseCa
         reserva.marcarComoRealizada();
 
         Reserva guardada = reservaRepository.save(reserva);
-        publicarEventos(guardada);
+        eventPublisher.publicar(guardada.pullEvents());
     }
 
     @Override
@@ -53,7 +61,7 @@ public class GestionarReservaApplicationService implements GestionarReservaUseCa
         reserva.cancelar(motivo);
 
         Reserva guardada = reservaRepository.save(reserva);
-        publicarEventos(guardada);
+        eventPublisher.publicar(guardada.pullEvents());
     }
 
     // ── Helpers privados ─────────────────────────────────────────────────────────
@@ -61,11 +69,5 @@ public class GestionarReservaApplicationService implements GestionarReservaUseCa
     private Reserva cargar(Long reservaId) {
         return reservaRepository.findById(reservaId)
                 .orElseThrow(() -> new RuntimeException("Reserva no encontrada: " + reservaId));
-    }
-
-    private void publicarEventos(Reserva reserva) {
-        reserva.pullEvents().forEach(evento ->
-                System.out.println("[DomainEvent emitido] " + evento.getClass().getSimpleName())
-        );
     }
 }
