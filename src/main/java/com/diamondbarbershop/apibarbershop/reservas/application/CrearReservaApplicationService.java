@@ -1,6 +1,7 @@
 package com.diamondbarbershop.apibarbershop.reservas.application;
 
 import com.diamondbarbershop.apibarbershop.reservas.application.chain.ValidacionReservaHandler;
+import com.diamondbarbershop.apibarbershop.reservas.application.event.ReservaDomainEventPublisher;
 import com.diamondbarbershop.apibarbershop.reservas.application.strategy.MontoCalculoStrategy;
 import com.diamondbarbershop.apibarbershop.reservas.application.strategy.MontoCalculoStrategySelector;
 import com.diamondbarbershop.apibarbershop.reservas.domain.model.Precio;
@@ -42,6 +43,12 @@ public class CrearReservaApplicationService implements CrearReservaUseCase {
      */
     private final MontoCalculoStrategySelector montoCalculoStrategySelector;
 
+    /**
+     * Publisher de Domain Events (PB-13) — distribuye los eventos emitidos
+     * por el aggregate a los listeners registrados.
+     */
+    private final ReservaDomainEventPublisher eventPublisher;
+
     @Override
     @Transactional
     public Long crear(CrearReservaCommand command) {
@@ -74,15 +81,15 @@ public class CrearReservaApplicationService implements CrearReservaUseCase {
         // 4. Persistir a través del puerto (no del JPA directamente).
         Reserva guardada = reservaRepository.save(reserva);
 
-        // 5. Publicar eventos emitidos por el aggregate.
-        //    Por ahora solo log — en PB-13 conectaremos el publisher real.
-        //    TODO PB-13: cuando se use recompensa, un RecompensaListener debería
-        //    "consumir" las 7 reservas anteriores marcándolas con estRecompensa = 1.
-        //    Eso es un efecto secundario del evento ReservaCreada cuando
-        //    usaRecompensa == true.
-        guardada.pullEvents().forEach(
-                event -> System.out.println("[Domain event emitido] "
-                        + event.getClass().getSimpleName()));
+        // 5. Publicar eventos emitidos por el aggregate (PB-13).
+        //    El publisher distribuye a todos los listeners registrados:
+        //      - RecompensaListener: si usaRecompensa = true, consume las
+        //        reservas anteriores del cliente.
+        //      - (Futuros) PushNotificacionAdminListener (PB-41),
+        //        NotificacionEmailClienteListener (PB-39).
+        //    Si algún listener falla, hace rollback de TODA la transacción
+        //    (incluye el save de la nueva reserva).
+        eventPublisher.publicar(guardada.pullEvents());
 
         return guardada.getId();
     }
