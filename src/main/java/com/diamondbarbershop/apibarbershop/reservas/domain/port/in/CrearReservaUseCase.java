@@ -34,6 +34,15 @@ public interface CrearReservaUseCase {
     /**
      * Command object: encapsula todos los datos necesarios para crear una reserva.
      * Es un Record de Java — inmutable por diseño.
+     *
+     * Campo usarRecompensa (PB-11 Strategy):
+     *   Si es true, el cliente declara que quiere consumir su recompensa de fidelidad
+     *   acumulada (precio = 0). El MontoCalculoStrategySelector lo lee y aplica
+     *   PrecioFidelidadStrategy. Si es false, aplica PrecioEstandarStrategy.
+     *
+     *   Hoy el backend confía en el flag (decisión explícita del cliente).
+     *   En PB-16 (Facade), se validará contra IdentidadFacade que el cliente
+     *   efectivamente tenga la recompensa disponible antes de aplicarla.
      */
     record CrearReservaCommand(
             Long barberoId,
@@ -42,6 +51,7 @@ public interface CrearReservaUseCase {
             Long horarioRangoId,
             Long precioServicio,
             LocalDate fechaReserva,
-            String adicionales
+            String adicionales,
+            boolean usarRecompensa
     ) {}
 }

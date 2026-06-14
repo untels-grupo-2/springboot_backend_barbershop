@@ -62,7 +62,8 @@ public class RestControllerReserva {
                 dto.getHorarioRangoId(),
                 servicioEntity.getPrecio(),
                 dto.getFechaReserva(),
-                dto.getAdicionales()
+                dto.getAdicionales(),
+                false  // usarRecompensa: este endpoint es la creación normal sin recompensa
         ));
 
         return ResponseEntity.status(HttpStatus.CREATED)
