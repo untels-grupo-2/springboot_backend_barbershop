@@ -1,5 +1,6 @@
 package com.diamondbarbershop.apibarbershop.reservas.domain.port.out;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -45,4 +46,19 @@ public interface IdentidadFacade {
      * @return Optional con el nombre, o vacío si el usuario no existe
      */
     Optional<String> obtenerNombre(Long usuarioId);
+
+    /**
+     * Devuelve los IDs de los usuarios que tienen el rol indicado.
+     *
+     * Usado por el BC notificaciones (PB-41) para resolver a quién enviar
+     * pushes — por ejemplo, "todos los usuarios con rol ADMIN".
+     *
+     * Se mantiene en IdentidadFacade para que el BC notificaciones nunca
+     * necesite importar nada del modelo interno de Identidad (entidad
+     * Usuario, Rol, repositorios).
+     *
+     * @param rol nombre del rol exactamente como está en BD ("ADMIN", "USER", "BARBERO")
+     * @return lista de IDs (puede ser vacía si nadie tiene ese rol)
+     */
+    List<Long> obtenerIdsUsuariosConRol(String rol);
 }

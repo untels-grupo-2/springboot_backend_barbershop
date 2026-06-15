@@ -6,6 +6,7 @@ import com.diamondbarbershop.apibarbershop.reservas.domain.port.out.IdentidadFac
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -52,5 +53,13 @@ public class IdentidadFacadeImpl implements IdentidadFacade {
     @Override
     public Optional<String> obtenerNombre(Long usuarioId) {
         return usuariosRepository.findById(usuarioId).map(Usuario::getNombre);
+    }
+
+    @Override
+    public List<Long> obtenerIdsUsuariosConRol(String rol) {
+        return usuariosRepository.findByRoles_Name(rol)
+                .stream()
+                .map(Usuario::getUsuario_id)
+                .toList();
     }
 }
