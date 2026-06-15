@@ -1,5 +1,7 @@
 package com.diamondbarbershop.apibarbershop.services;
 
+import com.diamondbarbershop.apibarbershop.agenda.application.factory.HorarioBaseTemplateCreator;
+import com.diamondbarbershop.apibarbershop.agenda.application.factory.HorarioBaseTemplateCreatorSelector;
 import com.diamondbarbershop.apibarbershop.cloudinaryImages.service.CloudinaryService;
 import com.diamondbarbershop.apibarbershop.dtos.barbero.request.DtoBarbero;
 import com.diamondbarbershop.apibarbershop.dtos.barbero.response.DtoBarberoResponse;
@@ -22,7 +24,7 @@ public class BarberoService {
 
     private final IBarberoRepository barberoRepository;
     private final AuthenticationManager authenticationManager;
-    private final HorarioBarberoBaseService horarioBarberoBaseService;
+    private final HorarioBaseTemplateCreatorSelector horarioBaseTemplateCreatorSelector;
     private final CloudinaryService cloudinaryService;
 
     @Transactional
@@ -39,7 +41,13 @@ public class BarberoService {
             barbero.setUrlBarbero(urlImagen);
         }
         barberoRepository.save(barbero);
-        horarioBarberoBaseService.crearHorarioBaseInicial(barbero.getBarbero_id());
+
+        // Factory Method (PB-12): el Selector escoge el Creator según el tipo
+        // de plantilla solicitado en el DTO. El Creator genera y persiste
+        // la plantilla inicial de HorarioBarberoBase.
+        HorarioBaseTemplateCreator creator =
+                horarioBaseTemplateCreatorSelector.seleccionar(dtoBarbero.getTipoPlantilla());
+        creator.crear(barbero.getBarbero_id());
     }
 
     public List<DtoBarberoResponse> readAll(){
