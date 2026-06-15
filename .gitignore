@@ -37,3 +37,11 @@ build/
 src/main/resources/application.yaml
 /docs
 .env
+
+# Por convención, el JSON de service account vive FUERA del repo
+# y se referencia por la variable de entorno FIREBASE_CREDENTIALS_PATH.
+# Aún así, si alguien lo deja por error en el proyecto, lo ignoramos.
+firebase-service-account.json
+**/firebase-service-account*.json
+**/firebase-adminsdk-*.json
+google-services.json
