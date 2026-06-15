@@ -1,18 +1,13 @@
 package com.diamondbarbershop.apibarbershop.services;
 
 import com.diamondbarbershop.apibarbershop.dtos.horarioBase.DtoHorarioBase;
-import com.diamondbarbershop.apibarbershop.exceptions.BarberoNoEncontradoException;
-import com.diamondbarbershop.apibarbershop.exceptions.TipoHorarioNoEncotradoException;
-import com.diamondbarbershop.apibarbershop.models.Barbero;
 import com.diamondbarbershop.apibarbershop.models.HorarioBarberoBase;
 import com.diamondbarbershop.apibarbershop.models.HorarioBarberoInstancia;
-import com.diamondbarbershop.apibarbershop.models.TipoHorario;
 import com.diamondbarbershop.apibarbershop.repositories.IBarberoRepository;
 import com.diamondbarbershop.apibarbershop.repositories.IHorarioBarberoBaseRepository;
 import com.diamondbarbershop.apibarbershop.repositories.IHorarioBarberoInstanciaRepository;
 import com.diamondbarbershop.apibarbershop.repositories.ITipoHorarioRepository;
 import com.diamondbarbershop.apibarbershop.util.DiaSemana;
-import com.diamondbarbershop.apibarbershop.util.MensajeError;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,27 +29,13 @@ public class HorarioBarberoBaseService {
     private final ITipoHorarioRepository tipoHorarioRepository;
     private final IHorarioBarberoInstanciaRepository horarioBarberoInstanciaRepository;
 
-
-    public void crearHorarioBaseInicial(Long barbero_id){
-        List<HorarioBarberoBase> horarios = new ArrayList<>();
-
-        for (DiaSemana dia : DiaSemana.values()){
-            for(long tipoHorarioId = 1; tipoHorarioId <= 3; tipoHorarioId++){
-                HorarioBarberoBase horario = new HorarioBarberoBase();
-                Barbero barbero = barberoRepository.findById(barbero_id)
-                                .orElseThrow(() -> new BarberoNoEncontradoException(MensajeError.BARBERO_NO_ENCONTRADO));
-                horario.setBarbero(barbero);
-                horario.setDia(dia);
-                TipoHorario tipoHorario = tipoHorarioRepository.findById(tipoHorarioId)
-                                .orElseThrow(() -> new TipoHorarioNoEncotradoException(MensajeError.TIPO_HORARIO_NO_ENCOTRADO));
-                horario.setTipoHorario(tipoHorario);
-                horario.setEst_id(null);
-                horario.setEstado(1);
-                horarios.add(horario);
-            }
-        }
-        horarioBarberoBaseRepository.saveAll(horarios);
-    }
+    // PB-12: el método crearHorarioBaseInicial() fue eliminado.
+    // La creación de la plantilla inicial de un barbero ahora se delega al
+    // Factory Method en agenda/application/factory/:
+    //   - HorarioBaseTemplateCreator  (clase abstracta con el Template Method)
+    //   - PlantillaCompletaCreator    / PlantillaFinDeSemanaCreator (concretos)
+    //   - HorarioBaseTemplateCreatorSelector (elige el Creator según el DTO)
+    // Ver BarberoService.crear() para el punto de uso.
 
     @Transactional
     public void actualizarTurnosDia(DtoHorarioBase dtoHorarioBase){
