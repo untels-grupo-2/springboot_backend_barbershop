@@ -7,8 +7,14 @@ import com.diamondbarbershop.apibarbershop.models.Usuario;
 import com.diamondbarbershop.apibarbershop.repositories.*;
 import com.diamondbarbershop.apibarbershop.reservas.domain.model.Precio;
 import com.diamondbarbershop.apibarbershop.reservas.domain.model.Reserva;
+import com.diamondbarbershop.apibarbershop.reservas.domain.port.in.FiltroReservaQuery;
+import com.diamondbarbershop.apibarbershop.reservas.domain.port.out.ReservaListadoView;
 import com.diamondbarbershop.apibarbershop.reservas.domain.port.out.ReservaRepository;
+import com.diamondbarbershop.apibarbershop.reservas.infrastructure.specification.ReservaSpecifications;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -80,7 +86,35 @@ public class ReservaJpaAdapter implements ReservaRepository {
         return reservaRepository.findAll().stream().map(this::toDomain).toList();
     }
 
+    @Override
+    public Page<ReservaListadoView> buscarParaListado(FiltroReservaQuery filtro, Pageable pageable) {
+        // PB-14 + PB-20: Specifications + Pagination combinados.
+        // El JpaSpecificationExecutor hace un solo query con WHERE dinámico,
+        // LIMIT/OFFSET y los JOINs implícitos hacia barbero, usuario, servicio
+        // y horarioRango — sin caer en N+1.
+        Specification<ReservaEntity> spec = ReservaSpecifications.componer(filtro);
+        return reservaRepository.findAll(spec, pageable).map(this::toListadoView);
+    }
+
     // ── Mappers ──────────────────────────────────────────────────────────────────
+
+    /**
+     * Convierte una ReservaEntity (JPA, con relaciones cargadas) a la proyección
+     * de listado optimizada para la UI. Solo se usa en consultas de lectura.
+     */
+    private ReservaListadoView toListadoView(ReservaEntity jpa) {
+        return new ReservaListadoView(
+                jpa.getReserva_id(),
+                jpa.getBarbero().getNombre(),
+                jpa.getUsuario().getUsuario_id(),
+                jpa.getUsuario().getNombre(),
+                jpa.getServicioEntity().getNombre(),
+                jpa.getHorarioRango().getRango(),
+                jpa.getEstado(),
+                jpa.getPrecioServicio(),
+                jpa.getFechaReserva()
+        );
+    }
 
     /**
      * Convierte el modelo de dominio a entidad JPA.

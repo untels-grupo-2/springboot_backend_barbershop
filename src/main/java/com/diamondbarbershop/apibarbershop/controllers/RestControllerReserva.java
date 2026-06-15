@@ -9,11 +9,15 @@ import com.diamondbarbershop.apibarbershop.models.ServicioEntity;
 import com.diamondbarbershop.apibarbershop.models.Usuario;
 import com.diamondbarbershop.apibarbershop.repositories.IServicioRepository;
 import com.diamondbarbershop.apibarbershop.repositories.IUsuariosRepository;
+import com.diamondbarbershop.apibarbershop.reservas.domain.port.in.ConsultarReservasUseCase;
 import com.diamondbarbershop.apibarbershop.reservas.domain.port.in.CrearReservaUseCase;
+import com.diamondbarbershop.apibarbershop.reservas.domain.port.in.FiltroReservaQuery;
 import com.diamondbarbershop.apibarbershop.reservas.domain.port.in.GestionarReservaUseCase;
 import com.diamondbarbershop.apibarbershop.services.ReservaService;
 import com.diamondbarbershop.apibarbershop.util.EstadoReserva;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +35,7 @@ public class RestControllerReserva {
 
     private final CrearReservaUseCase crearReservaUseCase;
     private final GestionarReservaUseCase gestionarReservaUseCase;
+    private final ConsultarReservasUseCase consultarReservasUseCase;
     private final IUsuariosRepository usuariosRepository;
     private final IServicioRepository servicioRepository;
     private final ReservaService reservaService;
@@ -79,13 +84,32 @@ public class RestControllerReserva {
         return ResponseEntity.ok(ApiResponse.succes("Comprobante subido", null));
     }
 
+    /**
+     * Listado paginado de reservas con filtros combinables (PB-14 + PB-20).
+     *
+     * Spring resuelve Pageable automáticamente desde los query params:
+     *   ?page=0&size=10&sort=fechaReserva,desc
+     *
+     * Ejemplos de uso:
+     *   GET /reservas/admin                                       → todas paginadas
+     *   GET /reservas/admin?barberoId=3                           → de un barbero
+     *   GET /reservas/admin?estado=CONFIRMADA&fechaDesde=2026-06-01
+     *   GET /reservas/admin?clienteId=5&page=0&size=20&sort=fechaReserva,desc
+     */
     @GetMapping("/admin")
-    public ResponseEntity<ApiResponse<List<DtoReservaResponse>>> listarReservas(
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha,
+    public ResponseEntity<ApiResponse<Page<DtoReservaResponse>>> listarReservas(
+            @RequestParam(required = false) Long barberoId,
+            @RequestParam(required = false) Long clienteId,
             @RequestParam(required = false) EstadoReserva estado,
-            @RequestParam(required = false) Long usuarioId ) {
-                List<DtoReservaResponse> reservas = reservaService.listarReservas(fecha, estado,usuarioId);
-        return ResponseEntity.ok(ApiResponse.succes("Lista de reservas",reservas));
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaDesde,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaHasta,
+            Pageable pageable
+    ) {
+        FiltroReservaQuery filtro = new FiltroReservaQuery(
+                barberoId, clienteId, estado, fechaDesde, fechaHasta
+        );
+        Page<DtoReservaResponse> reservas = consultarReservasUseCase.listar(filtro, pageable);
+        return ResponseEntity.ok(ApiResponse.succes("Lista de reservas", reservas));
     }
 
 

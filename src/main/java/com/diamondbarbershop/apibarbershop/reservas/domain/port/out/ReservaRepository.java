@@ -1,6 +1,9 @@
 package com.diamondbarbershop.apibarbershop.reservas.domain.port.out;
 
 import com.diamondbarbershop.apibarbershop.reservas.domain.model.Reserva;
+import com.diamondbarbershop.apibarbershop.reservas.domain.port.in.FiltroReservaQuery;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -47,4 +50,13 @@ public interface ReservaRepository {
 
     /** Todas las reservas — para reportes generales (usar con cuidado en producción). */
     List<Reserva> findAll();
+
+    /**
+     * Consulta paginada y filtrada de reservas para listados administrativos (PB-14 + PB-20).
+     *
+     * Retorna una proyección de solo lectura (ReservaListadoView) en lugar del
+     * agregado completo, para incluir nombres relacionados sin caer en N+1.
+     * El adapter usa Specifications dinámicas para componer la consulta JPA.
+     */
+    Page<ReservaListadoView> buscarParaListado(FiltroReservaQuery filtro, Pageable pageable);
 }
