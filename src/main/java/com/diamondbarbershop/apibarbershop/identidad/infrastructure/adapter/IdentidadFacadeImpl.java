@@ -1,9 +1,12 @@
 package com.diamondbarbershop.apibarbershop.identidad.infrastructure.adapter;
 
+import com.diamondbarbershop.apibarbershop.models.Usuario;
 import com.diamondbarbershop.apibarbershop.repositories.IUsuariosRepository;
 import com.diamondbarbershop.apibarbershop.reservas.domain.port.out.IdentidadFacade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 /**
  * Implementación de IdentidadFacade — vive en el BC Identidad.
@@ -39,5 +42,15 @@ public class IdentidadFacadeImpl implements IdentidadFacade {
         // Hoy: si existe, está activo. Cuando se agregue el campo estado,
         // se filtrará aquí.
         return existeUsuario(usuarioId);
+    }
+
+    @Override
+    public Optional<String> obtenerEmail(Long usuarioId) {
+        return usuariosRepository.findById(usuarioId).map(Usuario::getEmail);
+    }
+
+    @Override
+    public Optional<String> obtenerNombre(Long usuarioId) {
+        return usuariosRepository.findById(usuarioId).map(Usuario::getNombre);
     }
 }

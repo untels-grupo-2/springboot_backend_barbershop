@@ -203,7 +203,7 @@ public class Reserva {
         this.estado = EstadoReserva.CANCELADA;
         this.motivoDescripcion = motivo;
         this.eventos.add(new ReservaCancelada(
-                this.id, this.clienteId, motivo, LocalDateTime.now()
+                this.id, this.clienteId, this.fechaReserva, motivo, LocalDateTime.now()
         ));
     }
 

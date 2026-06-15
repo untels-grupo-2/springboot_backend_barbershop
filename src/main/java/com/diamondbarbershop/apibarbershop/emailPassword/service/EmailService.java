@@ -60,6 +60,43 @@ public class EmailService {
         }
     }
 
+    /**
+     * Envío genérico de correo HTML usando una plantilla Thymeleaf cualquiera.
+     *
+     * A diferencia de enviarCorreo(EmailDto), este método no asume nada del
+     * contenido (tokenPassword, URL de reset, etc.). El emisor pasa el nombre
+     * de la plantilla y un map de variables que el template puede consumir
+     * con th:text="${variable}".
+     *
+     * Pensado para reutilización por cualquier listener que necesite enviar
+     * notificaciones por correo — PB-39 lo usa desde NotificacionEmailReservaListener.
+     *
+     * @param mailTo       dirección del destinatario
+     * @param subject      asunto del correo
+     * @param templateName nombre del archivo sin extensión (ej. "reserva-confirmada")
+     * @param variables    variables a interpolar en la plantilla
+     * @throws EmailNoEnviadoException si falla el envío SMTP
+     */
+    public void enviarConTemplate(String mailTo, String subject,
+                                  String templateName, Map<String, Object> variables) {
+        MimeMessage message = javaMailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            Context context = new Context();
+            context.setVariables(variables);
+            String htmlText = templateEngine.process(templateName, context);
+
+            helper.setFrom(mailFrom);
+            helper.setTo(mailTo);
+            helper.setSubject(subject);
+            helper.setText(htmlText, true);
+
+            javaMailSender.send(message);
+        } catch (MessagingException e) {
+            throw new EmailNoEnviadoException(MensajeError.CORREO_NO_ENVIADO);
+        }
+    }
+
     public void procesarEnvioCorreo(EmailDto emailDto){
         //validar si el usuario existe
         Usuario usuario =usuariosRepository.findByUsername(emailDto.getUsername())
