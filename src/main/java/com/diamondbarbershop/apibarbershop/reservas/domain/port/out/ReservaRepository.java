@@ -15,7 +15,7 @@ import java.util.Optional;
  * ¿Por qué es una interfaz en el dominio y no una clase de Spring Data?
  *
  *   Con Spring Data JPA directamente:
- *     ReservaService → IReservaRepository (Spring Data) → BD
+ *     ReservaService → IReservaJpaRepository (Spring Data) → BD
  *     El dominio depende de la infraestructura. Si cambiamos de MySQL a MongoDB,
  *     hay que modificar el dominio.
  *

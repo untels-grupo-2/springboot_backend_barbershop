@@ -1,6 +1,6 @@
 package com.diamondbarbershop.apibarbershop.reservas.application.listeners;
 
-import com.diamondbarbershop.apibarbershop.emailPassword.service.EmailService;
+import com.diamondbarbershop.apibarbershop.shared.infrastructure.email.EmailService;
 import com.diamondbarbershop.apibarbershop.reservas.domain.event.ReservaCancelada;
 import com.diamondbarbershop.apibarbershop.reservas.domain.event.ReservaConfirmada;
 import com.diamondbarbershop.apibarbershop.reservas.domain.port.out.IdentidadFacade;

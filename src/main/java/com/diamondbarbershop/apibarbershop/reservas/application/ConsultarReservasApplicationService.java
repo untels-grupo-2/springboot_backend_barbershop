@@ -1,6 +1,6 @@
 package com.diamondbarbershop.apibarbershop.reservas.application;
 
-import com.diamondbarbershop.apibarbershop.dtos.reserva.response.DtoReservaResponse;
+import com.diamondbarbershop.apibarbershop.reservas.infrastructure.rest.dto.DtoReservaResponse;
 import com.diamondbarbershop.apibarbershop.reservas.domain.port.in.ConsultarReservasUseCase;
 import com.diamondbarbershop.apibarbershop.reservas.domain.port.in.FiltroReservaQuery;
 import com.diamondbarbershop.apibarbershop.reservas.domain.port.out.ReservaListadoView;

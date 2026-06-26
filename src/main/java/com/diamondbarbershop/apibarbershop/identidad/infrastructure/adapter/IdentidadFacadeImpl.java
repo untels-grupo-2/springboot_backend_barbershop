@@ -1,7 +1,7 @@
 package com.diamondbarbershop.apibarbershop.identidad.infrastructure.adapter;
 
-import com.diamondbarbershop.apibarbershop.models.Usuario;
-import com.diamondbarbershop.apibarbershop.repositories.IUsuariosRepository;
+import com.diamondbarbershop.apibarbershop.identidad.infrastructure.persistance.UsuarioJpaEntity;
+import com.diamondbarbershop.apibarbershop.identidad.infrastructure.persistance.IUsuarioJpaRepository;
 import com.diamondbarbershop.apibarbershop.reservas.domain.port.out.IdentidadFacade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -13,10 +13,10 @@ import java.util.Optional;
  * Implementación de IdentidadFacade — vive en el BC Identidad.
  *
  * Única clase del sistema que conoce los detalles internos del BC Identidad
- * (entidad JPA Usuario, repositorio, roles, JWT, refresh tokens).
+ * (entidad JPA UsuarioJpaEntity, repositorio, roles, JWT, refresh tokens).
  *
  * NOTA sobre estaActivoUsuario:
- *   La entidad Usuario actual NO tiene un campo "estado" — todo usuario
+ *   La entidad UsuarioJpaEntity actual NO tiene un campo "estado" — todo usuario
  *   que existe en BD se considera activo. La firma del método se mantiene
  *   por simetría con CatalogoFacade y PersonalFacade y para soportar
  *   evolución futura (cuando se agreguen estados como "suspendido" o
@@ -31,7 +31,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class IdentidadFacadeImpl implements IdentidadFacade {
 
-    private final IUsuariosRepository usuariosRepository;
+    private final IUsuarioJpaRepository usuariosRepository;
 
     @Override
     public boolean existeUsuario(Long usuarioId) {
@@ -47,19 +47,19 @@ public class IdentidadFacadeImpl implements IdentidadFacade {
 
     @Override
     public Optional<String> obtenerEmail(Long usuarioId) {
-        return usuariosRepository.findById(usuarioId).map(Usuario::getEmail);
+        return usuariosRepository.findById(usuarioId).map(UsuarioJpaEntity::getEmail);
     }
 
     @Override
     public Optional<String> obtenerNombre(Long usuarioId) {
-        return usuariosRepository.findById(usuarioId).map(Usuario::getNombre);
+        return usuariosRepository.findById(usuarioId).map(UsuarioJpaEntity::getNombre);
     }
 
     @Override
     public List<Long> obtenerIdsUsuariosConRol(String rol) {
         return usuariosRepository.findByRoles_Name(rol)
                 .stream()
-                .map(Usuario::getUsuario_id)
+                .map(UsuarioJpaEntity::getUsuario_id)
                 .toList();
     }
 }
