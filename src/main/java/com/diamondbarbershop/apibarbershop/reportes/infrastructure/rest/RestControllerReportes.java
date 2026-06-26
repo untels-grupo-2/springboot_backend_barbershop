@@ -1,5 +1,7 @@
 package com.diamondbarbershop.apibarbershop.reportes.infrastructure.rest;
 
+import com.diamondbarbershop.apibarbershop.reportes.domain.model.ReporteGanancias;
+import com.diamondbarbershop.apibarbershop.reportes.domain.port.in.ConsultarGananciasUseCase;
 import com.diamondbarbershop.apibarbershop.reportes.domain.port.in.ExportarReporteHorarioUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -12,14 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 
-/**
- * Controller para descargar reportes PDF (BC Reportes — feature cross-cutting).
- */
 @RestController
 @RequiredArgsConstructor
 public class RestControllerReportes {
 
     private final ExportarReporteHorarioUseCase exportarReporteHorarioUseCase;
+    private final ConsultarGananciasUseCase consultarGananciasUseCase;
 
     @GetMapping("/reporte/horarios")
     public ResponseEntity<byte[]> exportarHorarioPdf(
@@ -31,5 +31,15 @@ public class RestControllerReportes {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=horario_barbero.pdf")
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdf);
+    }
+
+    @GetMapping("/reservas/reportes/series")
+    public ResponseEntity<ReporteGanancias> consultarGanancias(
+            @RequestParam("fechaInicio") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+            @RequestParam("fechaFin") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin,
+            @RequestParam(value = "servicio", required = false) String servicio) {
+
+        ReporteGanancias reporte = consultarGananciasUseCase.consultar(fechaInicio, fechaFin, servicio);
+        return ResponseEntity.ok(reporte);
     }
 }
