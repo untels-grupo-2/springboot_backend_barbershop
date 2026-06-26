@@ -1,5 +1,7 @@
 package com.diamondbarbershop.apibarbershop.reservas.domain.port.out;
 
+import java.util.Optional;
+
 /**
  * Facade (GoF — Estructural) — PB-16.
  *
@@ -32,4 +34,13 @@ public interface CatalogoFacade {
      * @return true si el servicio existe y está activo (disponible para reserva)
      */
     boolean estaActivoServicio(Long servicioId);
+
+    /**
+     * Devuelve el precio actual del servicio.
+     * Usado por el BC Reservas al construir el comando de crear reserva
+     * sin tener que consultar al repositorio JPA legacy de catálogo.
+     *
+     * @return Optional con el precio, vacío si el servicio no existe
+     */
+    Optional<Long> obtenerPrecio(Long servicioId);
 }

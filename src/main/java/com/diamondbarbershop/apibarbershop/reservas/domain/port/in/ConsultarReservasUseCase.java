@@ -1,6 +1,6 @@
 package com.diamondbarbershop.apibarbershop.reservas.domain.port.in;
 
-import com.diamondbarbershop.apibarbershop.dtos.reserva.response.DtoReservaResponse;
+import com.diamondbarbershop.apibarbershop.reservas.infrastructure.rest.dto.DtoReservaResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

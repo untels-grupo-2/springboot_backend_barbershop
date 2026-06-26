@@ -1,6 +1,6 @@
 package com.diamondbarbershop.apibarbershop.notificaciones.infrastructure.rest;
 
-import com.diamondbarbershop.apibarbershop.dtos.common.ApiResponse;
+import com.diamondbarbershop.apibarbershop.shared.infrastructure.rest.ApiResponse;
 import com.diamondbarbershop.apibarbershop.notificaciones.domain.port.in.ListarNotificacionesAdminUseCase;
 import com.diamondbarbershop.apibarbershop.notificaciones.domain.port.in.MarcarNotificacionLeidaUseCase;
 import com.diamondbarbershop.apibarbershop.notificaciones.domain.port.out.NotificacionAdmin;

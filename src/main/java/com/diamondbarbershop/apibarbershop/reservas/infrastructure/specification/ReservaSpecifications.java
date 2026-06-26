@@ -1,6 +1,6 @@
 package com.diamondbarbershop.apibarbershop.reservas.infrastructure.specification;
 
-import com.diamondbarbershop.apibarbershop.models.ReservaEntity;
+import com.diamondbarbershop.apibarbershop.reservas.infrastructure.persistance.ReservaJpaEntity;
 import com.diamondbarbershop.apibarbershop.reservas.domain.port.in.FiltroReservaQuery;
 import com.diamondbarbershop.apibarbershop.util.EstadoReserva;
 import org.springframework.data.jpa.domain.Specification;
@@ -8,7 +8,7 @@ import org.springframework.data.jpa.domain.Specification;
 import java.time.LocalDate;
 
 /**
- * Specifications de Spring Data JPA para consultar ReservaEntity (PB-14).
+ * Specifications de Spring Data JPA para consultar ReservaJpaEntity (PB-14).
  *
  * Cada método estático devuelve una Specification componible (o null si el
  * filtro no aplica). Se combinan con Specification.where(...).and(...) en
@@ -34,7 +34,7 @@ public final class ReservaSpecifications {
      * Compone una Specification dinámica a partir del FiltroReservaQuery.
      * Cada campo nulo del filtro se ignora; los presentes se combinan con AND.
      */
-    public static Specification<ReservaEntity> componer(FiltroReservaQuery filtro) {
+    public static Specification<ReservaJpaEntity> componer(FiltroReservaQuery filtro) {
         return Specification
                 .where(porBarberoId(filtro.barberoId()))
                 .and(porClienteId(filtro.clienteId()))
@@ -44,35 +44,35 @@ public final class ReservaSpecifications {
     }
 
     /** Filtra por barbero. Retorna null si barberoId es null (no aplicar filtro). */
-    public static Specification<ReservaEntity> porBarberoId(Long barberoId) {
+    public static Specification<ReservaJpaEntity> porBarberoId(Long barberoId) {
         if (barberoId == null) return null;
         return (root, query, cb) ->
                 cb.equal(root.get("barbero").get("barbero_id"), barberoId);
     }
 
     /** Filtra por cliente (usuario). */
-    public static Specification<ReservaEntity> porClienteId(Long clienteId) {
+    public static Specification<ReservaJpaEntity> porClienteId(Long clienteId) {
         if (clienteId == null) return null;
         return (root, query, cb) ->
                 cb.equal(root.get("usuario").get("usuario_id"), clienteId);
     }
 
     /** Filtra por estado de la reserva. */
-    public static Specification<ReservaEntity> porEstado(EstadoReserva estado) {
+    public static Specification<ReservaJpaEntity> porEstado(EstadoReserva estado) {
         if (estado == null) return null;
         return (root, query, cb) ->
                 cb.equal(root.get("estado"), estado);
     }
 
     /** Reservas con fechaReserva >= desde. */
-    public static Specification<ReservaEntity> desdeFecha(LocalDate desde) {
+    public static Specification<ReservaJpaEntity> desdeFecha(LocalDate desde) {
         if (desde == null) return null;
         return (root, query, cb) ->
                 cb.greaterThanOrEqualTo(root.get("fechaReserva"), desde);
     }
 
     /** Reservas con fechaReserva <= hasta. */
-    public static Specification<ReservaEntity> hastaFecha(LocalDate hasta) {
+    public static Specification<ReservaJpaEntity> hastaFecha(LocalDate hasta) {
         if (hasta == null) return null;
         return (root, query, cb) ->
                 cb.lessThanOrEqualTo(root.get("fechaReserva"), hasta);

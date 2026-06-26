@@ -1,7 +1,7 @@
 package com.diamondbarbershop.apibarbershop.personal.infrastructure.adapter;
 
-import com.diamondbarbershop.apibarbershop.models.Barbero;
-import com.diamondbarbershop.apibarbershop.repositories.IBarberoRepository;
+import com.diamondbarbershop.apibarbershop.personal.infrastructure.persistance.BarberoJpaEntity;
+import com.diamondbarbershop.apibarbershop.personal.infrastructure.persistance.IBarberoJpaRepository;
 import com.diamondbarbershop.apibarbershop.reservas.domain.port.out.PersonalFacade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -12,8 +12,8 @@ import java.util.Optional;
  * Implementación de PersonalFacade — vive en el BC Personal.
  *
  * Única clase del sistema que conoce el detalle interno de cómo el BC
- * Personal almacena la información (entidad JPA Barbero, repositorio
- * IBarberoRepository).
+ * Personal almacena la información (entidad JPA BarberoJpaEntity, repositorio
+ * IBarberoJpaRepository).
  *
  * NOTA TRANSITORIA:
  *   Cuando se complete la migración hexagonal del BC Personal,
@@ -24,7 +24,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class PersonalFacadeImpl implements PersonalFacade {
 
-    private final IBarberoRepository barberoRepository;
+    private final IBarberoJpaRepository barberoRepository;
 
     @Override
     public boolean existeBarbero(Long barberoId) {
@@ -33,7 +33,7 @@ public class PersonalFacadeImpl implements PersonalFacade {
 
     @Override
     public boolean estaActivoBarbero(Long barberoId) {
-        Optional<Barbero> barbero = barberoRepository.findById(barberoId);
+        Optional<BarberoJpaEntity> barbero = barberoRepository.findById(barberoId);
         return barbero.isPresent()
                 && Integer.valueOf(1).equals(barbero.get().getEstado());
     }

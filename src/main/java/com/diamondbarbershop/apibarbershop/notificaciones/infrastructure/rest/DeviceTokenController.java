@@ -1,10 +1,10 @@
 package com.diamondbarbershop.apibarbershop.notificaciones.infrastructure.rest;
 
-import com.diamondbarbershop.apibarbershop.dtos.common.ApiResponse;
-import com.diamondbarbershop.apibarbershop.exceptions.UsuarioExistenteException;
-import com.diamondbarbershop.apibarbershop.models.Usuario;
+import com.diamondbarbershop.apibarbershop.shared.infrastructure.rest.ApiResponse;
+import com.diamondbarbershop.apibarbershop.identidad.domain.exception.UsuarioExistenteException;
+import com.diamondbarbershop.apibarbershop.identidad.infrastructure.persistance.UsuarioJpaEntity;
 import com.diamondbarbershop.apibarbershop.notificaciones.domain.port.in.RegistrarDeviceTokenUseCase;
-import com.diamondbarbershop.apibarbershop.repositories.IUsuariosRepository;
+import com.diamondbarbershop.apibarbershop.identidad.infrastructure.persistance.IUsuarioJpaRepository;
 import com.diamondbarbershop.apibarbershop.util.MensajeError;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -37,14 +37,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class DeviceTokenController {
 
     private final RegistrarDeviceTokenUseCase registrarDeviceTokenUseCase;
-    private final IUsuariosRepository usuariosRepository;
+    private final IUsuarioJpaRepository usuariosRepository;
 
     @PostMapping
     public ResponseEntity<ApiResponse<Object>> registrar(
             @Valid @RequestBody DtoRegistrarDeviceToken dto,
             Authentication authentication
     ) {
-        Usuario usuario = usuariosRepository.findByUsername(authentication.getName())
+        UsuarioJpaEntity usuario = usuariosRepository.findByUsername(authentication.getName())
                 .orElseThrow(() -> new UsuarioExistenteException(MensajeError.USUARIO_NO_EXISTENTE));
 
         registrarDeviceTokenUseCase.registrar(

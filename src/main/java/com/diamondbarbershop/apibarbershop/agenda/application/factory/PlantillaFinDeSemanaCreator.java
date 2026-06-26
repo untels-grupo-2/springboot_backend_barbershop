@@ -1,11 +1,11 @@
 package com.diamondbarbershop.apibarbershop.agenda.application.factory;
 
-import com.diamondbarbershop.apibarbershop.models.Barbero;
-import com.diamondbarbershop.apibarbershop.models.HorarioBarberoBase;
-import com.diamondbarbershop.apibarbershop.models.TipoHorario;
-import com.diamondbarbershop.apibarbershop.repositories.IBarberoRepository;
-import com.diamondbarbershop.apibarbershop.repositories.IHorarioBarberoBaseRepository;
-import com.diamondbarbershop.apibarbershop.repositories.ITipoHorarioRepository;
+import com.diamondbarbershop.apibarbershop.personal.infrastructure.persistance.BarberoJpaEntity;
+import com.diamondbarbershop.apibarbershop.agenda.infrastructure.persistance.HorarioBarberoBaseJpaEntity;
+import com.diamondbarbershop.apibarbershop.agenda.infrastructure.persistance.TipoHorarioJpaEntity;
+import com.diamondbarbershop.apibarbershop.personal.infrastructure.persistance.IBarberoJpaRepository;
+import com.diamondbarbershop.apibarbershop.agenda.infrastructure.persistance.IHorarioBarberoBaseJpaRepository;
+import com.diamondbarbershop.apibarbershop.agenda.infrastructure.persistance.ITipoHorarioJpaRepository;
 import com.diamondbarbershop.apibarbershop.util.DiaSemana;
 import org.springframework.stereotype.Component;
 
@@ -39,26 +39,26 @@ public class PlantillaFinDeSemanaCreator extends HorarioBaseTemplateCreator {
     );
 
     public PlantillaFinDeSemanaCreator(
-            IBarberoRepository barberoRepository,
-            ITipoHorarioRepository tipoHorarioRepository,
-            IHorarioBarberoBaseRepository horarioBaseRepository
+            IBarberoJpaRepository barberoRepository,
+            ITipoHorarioJpaRepository tipoHorarioRepository,
+            IHorarioBarberoBaseJpaRepository horarioBaseRepository
     ) {
         super(barberoRepository, tipoHorarioRepository, horarioBaseRepository);
     }
 
     @Override
-    protected List<HorarioBarberoBase> ensamblar(Barbero barbero, List<TipoHorario> tipos) {
-        List<HorarioBarberoBase> plantilla = new ArrayList<>();
+    protected List<HorarioBarberoBaseJpaEntity> ensamblar(BarberoJpaEntity barbero, List<TipoHorarioJpaEntity> tipos) {
+        List<HorarioBarberoBaseJpaEntity> plantilla = new ArrayList<>();
         for (DiaSemana dia : DIAS_FIN_DE_SEMANA) {
-            for (TipoHorario tipo : tipos) {
+            for (TipoHorarioJpaEntity tipo : tipos) {
                 plantilla.add(construirEntrada(barbero, tipo, dia));
             }
         }
         return plantilla;
     }
 
-    private HorarioBarberoBase construirEntrada(Barbero barbero, TipoHorario tipo, DiaSemana dia) {
-        HorarioBarberoBase entrada = new HorarioBarberoBase();
+    private HorarioBarberoBaseJpaEntity construirEntrada(BarberoJpaEntity barbero, TipoHorarioJpaEntity tipo, DiaSemana dia) {
+        HorarioBarberoBaseJpaEntity entrada = new HorarioBarberoBaseJpaEntity();
         entrada.setBarbero(barbero);
         entrada.setTipoHorario(tipo);
         entrada.setDia(dia);

@@ -1,13 +1,13 @@
 package com.diamondbarbershop.apibarbershop.agenda.application.factory;
 
-import com.diamondbarbershop.apibarbershop.exceptions.BarberoNoEncontradoException;
-import com.diamondbarbershop.apibarbershop.exceptions.TipoHorarioNoEncotradoException;
-import com.diamondbarbershop.apibarbershop.models.Barbero;
-import com.diamondbarbershop.apibarbershop.models.HorarioBarberoBase;
-import com.diamondbarbershop.apibarbershop.models.TipoHorario;
-import com.diamondbarbershop.apibarbershop.repositories.IBarberoRepository;
-import com.diamondbarbershop.apibarbershop.repositories.IHorarioBarberoBaseRepository;
-import com.diamondbarbershop.apibarbershop.repositories.ITipoHorarioRepository;
+import com.diamondbarbershop.apibarbershop.personal.domain.exception.BarberoNoEncontradoException;
+import com.diamondbarbershop.apibarbershop.agenda.domain.exception.TipoHorarioNoEncotradoException;
+import com.diamondbarbershop.apibarbershop.personal.infrastructure.persistance.BarberoJpaEntity;
+import com.diamondbarbershop.apibarbershop.agenda.infrastructure.persistance.HorarioBarberoBaseJpaEntity;
+import com.diamondbarbershop.apibarbershop.agenda.infrastructure.persistance.TipoHorarioJpaEntity;
+import com.diamondbarbershop.apibarbershop.personal.infrastructure.persistance.IBarberoJpaRepository;
+import com.diamondbarbershop.apibarbershop.agenda.infrastructure.persistance.IHorarioBarberoBaseJpaRepository;
+import com.diamondbarbershop.apibarbershop.agenda.infrastructure.persistance.ITipoHorarioJpaRepository;
 import com.diamondbarbershop.apibarbershop.util.MensajeError;
 import lombok.RequiredArgsConstructor;
 
@@ -33,7 +33,7 @@ import java.util.List;
  *
  * NOTA TRANSITORIA:
  *   Hoy esta clase consume los repositorios JPA legacy del BC Agenda
- *   (IHorarioBarberoBaseRepository, IBarberoRepository, ITipoHorarioRepository).
+ *   (IHorarioBarberoBaseJpaRepository, IBarberoJpaRepository, ITipoHorarioJpaRepository).
  *   Cuando se complete la migración hexagonal del BC Agenda en Sprint 4,
  *   estos repos se reemplazarán por puertos de salida propios del BC.
  *   La API pública (crear(), ensamblar()) no cambia.
@@ -41,26 +41,26 @@ import java.util.List;
 @RequiredArgsConstructor
 public abstract class HorarioBaseTemplateCreator {
 
-    protected final IBarberoRepository barberoRepository;
-    protected final ITipoHorarioRepository tipoHorarioRepository;
-    protected final IHorarioBarberoBaseRepository horarioBaseRepository;
+    protected final IBarberoJpaRepository barberoRepository;
+    protected final ITipoHorarioJpaRepository tipoHorarioRepository;
+    protected final IHorarioBarberoBaseJpaRepository horarioBaseRepository;
 
     /**
      * Template Method — flujo fijo de creación.
      * No se sobrescribe; las subclases solo redefinen ensamblar().
      */
     public final void crear(Long barberoId) {
-        Barbero barbero = barberoRepository.findById(barberoId)
+        BarberoJpaEntity barbero = barberoRepository.findById(barberoId)
                 .orElseThrow(() -> new BarberoNoEncontradoException(
                         MensajeError.BARBERO_NO_ENCONTRADO));
 
-        List<TipoHorario> tipos = tipoHorarioRepository.findAll();
+        List<TipoHorarioJpaEntity> tipos = tipoHorarioRepository.findAll();
         if (tipos.isEmpty()) {
             throw new TipoHorarioNoEncotradoException(
                     MensajeError.TIPO_HORARIO_NO_ENCOTRADO);
         }
 
-        List<HorarioBarberoBase> plantilla = ensamblar(barbero, tipos);
+        List<HorarioBarberoBaseJpaEntity> plantilla = ensamblar(barbero, tipos);
 
         horarioBaseRepository.saveAll(plantilla);
     }
@@ -70,11 +70,11 @@ public abstract class HorarioBaseTemplateCreator {
      * forman parte de su plantilla.
      *
      * @param barbero   barbero al que se le asigna la plantilla
-     * @param tipos     todos los TipoHorario disponibles en el sistema
-     * @return lista de HorarioBarberoBase listos para persistir
+     * @param tipos     todos los TipoHorarioJpaEntity disponibles en el sistema
+     * @return lista de HorarioBarberoBaseJpaEntity listos para persistir
      */
-    protected abstract List<HorarioBarberoBase> ensamblar(
-            Barbero barbero,
-            List<TipoHorario> tipos
+    protected abstract List<HorarioBarberoBaseJpaEntity> ensamblar(
+            BarberoJpaEntity barbero,
+            List<TipoHorarioJpaEntity> tipos
     );
 }
