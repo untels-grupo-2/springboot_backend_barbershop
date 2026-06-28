@@ -15,4 +15,6 @@ public interface HorarioInstanciaRepository {
     List<HorarioBarberoInstancia> findByBarberoIdAndFecha(Long barberoId, LocalDate fecha);
 
     HorarioBarberoInstancia save(HorarioBarberoInstancia instancia);
+
+    void deleteByFechaBetween(LocalDate desde, LocalDate hasta);
 }

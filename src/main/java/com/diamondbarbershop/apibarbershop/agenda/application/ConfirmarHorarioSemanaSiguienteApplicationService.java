@@ -23,10 +23,8 @@ import java.util.List;
  *   - Admin manualmente (PUT /horarios-base/confirmacion)
  *   - HorarioBaseScheduler cada domingo 23:50
  *
- * NOTA TRANSITORIA: actualmente sobrescribe sin eliminar la semana siguiente
- * (esa parte se delega al adapter porque requiere acceso al JPA repo de
- * Instancia para deleteByFechaBetween). Cuando se completen los adapters
- * con métodos específicos, este servicio se mantiene igual.
+ * Limpia las instancias existentes de la semana siguiente antes de regenerarlas,
+ * garantizando idempotencia (confirmar varias veces = mismo resultado).
  */
 @Service
 @RequiredArgsConstructor
@@ -40,6 +38,9 @@ public class ConfirmarHorarioSemanaSiguienteApplicationService
     @Transactional
     public void confirmar() {
         LocalDate proximoLunes = LocalDate.now().with(TemporalAdjusters.next(DayOfWeek.MONDAY));
+        LocalDate proximoDomingo = proximoLunes.plusDays(6);
+
+        horarioInstanciaRepository.deleteByFechaBetween(proximoLunes, proximoDomingo);
 
         List<HorarioBarberoBase> baseActivos = horarioBaseRepository.findActivos();
 

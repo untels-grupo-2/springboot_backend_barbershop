@@ -37,6 +37,11 @@ public class HorarioInstanciaJpaAdapter implements HorarioInstanciaRepository {
     }
 
     @Override
+    public void deleteByFechaBetween(LocalDate desde, LocalDate hasta) {
+        instanciaJpaRepository.deleteByFechaBetween(desde, hasta);
+    }
+
+    @Override
     public HorarioBarberoInstancia save(HorarioBarberoInstancia instancia) {
         com.diamondbarbershop.apibarbershop.agenda.infrastructure.persistance.HorarioBarberoInstanciaJpaEntity entity = toJpa(instancia);
         var saved = instanciaJpaRepository.save(entity);
