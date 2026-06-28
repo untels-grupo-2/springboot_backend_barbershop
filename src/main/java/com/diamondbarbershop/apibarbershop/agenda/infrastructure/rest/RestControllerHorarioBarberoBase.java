@@ -1,15 +1,18 @@
 package com.diamondbarbershop.apibarbershop.agenda.infrastructure.rest;
 
+import com.diamondbarbershop.apibarbershop.agenda.domain.model.HorarioBaseView;
 import com.diamondbarbershop.apibarbershop.agenda.domain.port.in.ActualizarTurnosDiaUseCase;
 import com.diamondbarbershop.apibarbershop.agenda.domain.port.in.ConfirmarHorarioSemanaSiguienteUseCase;
+import com.diamondbarbershop.apibarbershop.agenda.domain.port.in.ConsultarHorarioBaseUseCase;
 import com.diamondbarbershop.apibarbershop.shared.infrastructure.rest.ApiResponse;
 import com.diamondbarbershop.apibarbershop.agenda.infrastructure.rest.dto.DtoHorarioBase;
+import com.diamondbarbershop.apibarbershop.util.DiaSemana;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/horarios-base")
@@ -18,6 +21,13 @@ public class RestControllerHorarioBarberoBase {
 
     private final ActualizarTurnosDiaUseCase actualizarTurnosDiaUseCase;
     private final ConfirmarHorarioSemanaSiguienteUseCase confirmarHorarioUseCase;
+    private final ConsultarHorarioBaseUseCase consultarHorarioBaseUseCase;
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<Map<DiaSemana, List<HorarioBaseView>>>> listarHorarioBase() {
+        Map<DiaSemana, List<HorarioBaseView>> horarios = consultarHorarioBaseUseCase.listarAgrupadoPorDia();
+        return ResponseEntity.ok(ApiResponse.succes("Horario base obtenido correctamente", horarios));
+    }
 
     @PutMapping
     public ResponseEntity<ApiResponse<Object>> actualizarTurnosDia(@RequestBody DtoHorarioBase dto) {

@@ -1,6 +1,7 @@
 package com.diamondbarbershop.apibarbershop.agenda.infrastructure.persistance;
 
 import com.diamondbarbershop.apibarbershop.agenda.domain.model.HorarioBarberoBase;
+import com.diamondbarbershop.apibarbershop.agenda.domain.model.HorarioBaseView;
 import com.diamondbarbershop.apibarbershop.agenda.domain.port.out.HorarioBarberoBaseRepository;
 import com.diamondbarbershop.apibarbershop.personal.infrastructure.persistance.BarberoJpaEntity;
 import com.diamondbarbershop.apibarbershop.agenda.infrastructure.persistance.TipoHorarioJpaEntity;
@@ -44,6 +45,13 @@ public class HorarioBarberoBaseJpaAdapter implements HorarioBarberoBaseRepositor
     }
 
     @Override
+    public List<HorarioBaseView> findAllActivosComoView() {
+        return horarioBaseJpaRepository.findAllActivosConRelaciones().stream()
+                .map(this::toView)
+                .toList();
+    }
+
+    @Override
     public void saveAll(List<HorarioBarberoBase> registros) {
         List<com.diamondbarbershop.apibarbershop.agenda.infrastructure.persistance.HorarioBarberoBaseJpaEntity> jpaEntities =
                 registros.stream().map(this::toJpa).toList();
@@ -80,5 +88,17 @@ public class HorarioBarberoBaseJpaAdapter implements HorarioBarberoBaseRepositor
         b.setEstId(entity.getEst_id());
         b.setEstado(entity.getEstado());
         return b;
+    }
+
+    private HorarioBaseView toView(HorarioBarberoBaseJpaEntity entity) {
+        return new HorarioBaseView(
+                entity.getHorarioBarberoBase_id(),
+                entity.getBarbero().getBarbero_id(),
+                entity.getBarbero().getNombre(),
+                entity.getTipoHorario().getId(),
+                entity.getTipoHorario().getNombre(),
+                entity.getDia(),
+                entity.getEst_id() != null && entity.getEst_id() == 1
+        );
     }
 }
