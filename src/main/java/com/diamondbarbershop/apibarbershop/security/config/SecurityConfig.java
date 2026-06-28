@@ -2,6 +2,7 @@ package com.diamondbarbershop.apibarbershop.security.config;
 
 import com.diamondbarbershop.apibarbershop.security.jwt.JwtAuthenticationEntryPoint;
 import com.diamondbarbershop.apibarbershop.security.util.ConstantesSeguridad;
+import com.diamondbarbershop.apibarbershop.shared.infrastructure.ratelimit.RateLimitFilter;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -33,11 +35,14 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final RateLimitFilter rateLimitFilter;
 
     @Autowired
-    public SecurityConfig(JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint) {
+    public SecurityConfig(JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
+                          RateLimitFilter rateLimitFilter) {
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
+        this.rateLimitFilter = rateLimitFilter;
     }
 
     //Este bean va a encargarse de verificar la información de los usuarios que se loguearán en nuestra api
@@ -169,8 +174,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/reservas/reportes").hasAuthority("ADMIN")
                         .anyRequest().authenticated()
                 )
-                // OAuth2 Resource Server reemplaza al JwtAuthenticationFilter manual.
-                // Spring Security valida la firma, expiración y claims del JWT automáticamente.
+                .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt
                                 .decoder(jwtDecoder())
