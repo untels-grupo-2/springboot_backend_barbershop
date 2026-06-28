@@ -4,6 +4,8 @@ spring:
   mvc:
     servlet:
       path: /api
+  application:
+    name: api-barbershop
 
 mail:
   urlFront: ${MAIL_URL_FRONT:http://localhost:4200/reset-password}
@@ -12,3 +14,22 @@ cloudinary:
   cloud_name: ${CLOUDINARY_CLOUD_NAME}
   api_key: ${CLOUDINARY_API_KEY}
   api_secret: ${CLOUDINARY_API_SECRET}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+      show-components: when-authorized
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    name: Diamond BarberHub API
+    version: 1.0.0
+    description: API del sistema de reservas para barberia
