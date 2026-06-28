@@ -1,15 +1,13 @@
 package com.diamondbarbershop.apibarbershop;
 
-import org.junit.jupiter.api.Disabled;
+import com.diamondbarbershop.apibarbershop.integration.BaseIntegrationTest;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-@Disabled("Requiere BD y variables de entorno — se habilitará en PB-23 con Testcontainers")
-class BarbershopApplicationTests {
+class BarbershopApplicationTests extends BaseIntegrationTest {
 
     @Test
+    @DisplayName("El contexto de Spring levanta correctamente con Testcontainers")
     void contextLoads() {
     }
-
 }

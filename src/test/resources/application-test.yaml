@@ -1,0 +1,33 @@
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.actuate.autoconfigure.mail.MailHealthContributorAutoConfiguration
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  mail:
+    host: localhost
+    port: 2525
+    username: test
+    password: test
+
+mail:
+  urlFront: http://localhost:4200/reset-password
+
+cloudinary:
+  cloud_name: test
+  api_key: test
+  api_secret: test
+
+management:
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
