@@ -15,10 +15,8 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true  # BD ya existente: marca V1 como aplicado sin ejecutarlo
     baseline-version: 1
-  data:
-    redis:
-      host: localhost
-      port: 6379
+  autoconfigure:
+    exclude: ${REDIS_EXCLUDE:org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration}
   mail:
     host: smtp.gmail.com
     port: 587
