@@ -8,6 +8,7 @@ import com.diamondbarbershop.apibarbershop.shared.domain.port.out.SubidorImagen;
 import com.diamondbarbershop.apibarbershop.catalogo.domain.exception.ServicioNoEncontradoException;
 import com.diamondbarbershop.apibarbershop.util.MensajeError;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +33,7 @@ public class CrearServicioApplicationService implements CrearServicioUseCase {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = "servicios", allEntries = true)
     public Long crear(CrearServicioCommand command) {
         tipoServicioRepository.findById(command.tipoServicioId())
                 .orElseThrow(() -> new ServicioNoEncontradoException(MensajeError.TIPO_SERVICIO_NO_ENCONTRADO));

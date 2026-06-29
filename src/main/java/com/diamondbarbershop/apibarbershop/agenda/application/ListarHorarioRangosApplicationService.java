@@ -4,6 +4,7 @@ import com.diamondbarbershop.apibarbershop.agenda.domain.model.HorarioRango;
 import com.diamondbarbershop.apibarbershop.agenda.domain.port.in.ListarHorarioRangosUseCase;
 import com.diamondbarbershop.apibarbershop.agenda.domain.port.out.HorarioRangoRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +18,7 @@ public class ListarHorarioRangosApplicationService implements ListarHorarioRango
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable("rangos-horario")
     public List<HorarioRango> listar() {
         return horarioRangoRepository.findAll();
     }

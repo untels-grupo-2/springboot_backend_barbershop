@@ -6,14 +6,12 @@ import com.diamondbarbershop.apibarbershop.personal.domain.port.in.ConsultarBarb
 import com.diamondbarbershop.apibarbershop.personal.domain.port.out.BarberoRepository;
 import com.diamondbarbershop.apibarbershop.util.MensajeError;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-/**
- * Application service para consultas de barbero (listAll + readOne).
- */
 @Service
 @RequiredArgsConstructor
 public class ConsultarBarberosApplicationService implements ConsultarBarberosUseCase {
@@ -22,6 +20,7 @@ public class ConsultarBarberosApplicationService implements ConsultarBarberosUse
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable("barberos")
     public List<Barbero> listarActivos() {
         return barberoRepository.findActivos();
     }

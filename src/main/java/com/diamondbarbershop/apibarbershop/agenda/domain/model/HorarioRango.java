@@ -31,4 +31,9 @@ public class HorarioRango {
     public String getRango()             { return rango; }
     public Long getTipoHorarioId()       { return tipoHorarioId; }
     public String getTipoHorarioNombre() { return tipoHorarioNombre; }
+
+    public void setId(Long id)                              { this.id = id; }
+    public void setRango(String rango)                      { this.rango = rango; }
+    public void setTipoHorarioId(Long tipoHorarioId)        { this.tipoHorarioId = tipoHorarioId; }
+    public void setTipoHorarioNombre(String tipoHorarioNombre) { this.tipoHorarioNombre = tipoHorarioNombre; }
 }

@@ -6,15 +6,12 @@ import com.diamondbarbershop.apibarbershop.catalogo.domain.port.out.ServicioRepo
 import com.diamondbarbershop.apibarbershop.catalogo.domain.exception.ServicioNoEncontradoException;
 import com.diamondbarbershop.apibarbershop.util.MensajeError;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-/**
- * Application service de consulta de servicios.
- * Read-only — Hibernate puede optimizar el manejo de sesión con la pista.
- */
 @Service
 @RequiredArgsConstructor
 public class ConsultarServiciosApplicationService implements ConsultarServiciosUseCase {
@@ -23,6 +20,7 @@ public class ConsultarServiciosApplicationService implements ConsultarServiciosU
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable("servicios")
     public List<Servicio> listarActivos() {
         return servicioRepository.findActivos();
     }

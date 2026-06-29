@@ -4,6 +4,7 @@ import com.diamondbarbershop.apibarbershop.agenda.domain.model.HorarioBarberoBas
 import com.diamondbarbershop.apibarbershop.agenda.domain.port.in.ActualizarTurnosDiaUseCase;
 import com.diamondbarbershop.apibarbershop.agenda.domain.port.out.HorarioBarberoBaseRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +28,7 @@ public class ActualizarTurnosDiaApplicationService implements ActualizarTurnosDi
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = "horario-base", allEntries = true)
     public void actualizar(ActualizarTurnosDiaCommand command) {
         List<HorarioBarberoBase> registrosDia = horarioBaseRepository.findByDia(command.dia());
 

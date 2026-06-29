@@ -8,6 +8,7 @@ import com.diamondbarbershop.apibarbershop.shared.domain.port.out.SubidorImagen;
 import com.diamondbarbershop.apibarbershop.catalogo.domain.exception.ServicioNoEncontradoException;
 import com.diamondbarbershop.apibarbershop.util.MensajeError;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +30,7 @@ public class ActualizarServicioApplicationService implements ActualizarServicioU
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = "servicios", allEntries = true)
     public void actualizar(ActualizarServicioCommand command) {
         Servicio servicio = servicioRepository.findById(command.servicioId())
                 .orElseThrow(() -> new ServicioNoEncontradoException(MensajeError.SERVICIO_NO_ENCONTRADO));

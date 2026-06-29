@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -40,7 +41,8 @@ class ConsultarReservasApplicationServiceTest {
 
         ReservaListadoView view = new ReservaListadoView(
                 1L, "Carlos", 2L, "Juan", "Corte clasico",
-                "09:00-10:00", EstadoReserva.CREADA, 50L, LocalDate.now()
+                "09:00-10:00", EstadoReserva.CREADA, 50L, LocalDate.now(),
+                null, "Sin adicionales", LocalDateTime.now(), 0, "https://pago.com/123"
         );
         Page<ReservaListadoView> pageResult = new PageImpl<>(List.of(view));
         when(reservaRepository.buscarParaListado(filtro, pageable)).thenReturn(pageResult);
@@ -55,6 +57,10 @@ class ConsultarReservasApplicationServiceTest {
         assertThat(dto.getServicioNombre()).isEqualTo("Corte clasico");
         assertThat(dto.getEstado()).isEqualTo("CREADA");
         assertThat(dto.getMontoTotal()).isEqualTo(50L);
+        assertThat(dto.getFechaReserva()).isNotNull();
+        assertThat(dto.getAdicionales()).isEqualTo("Sin adicionales");
+        assertThat(dto.getUrlPago()).isEqualTo("https://pago.com/123");
+        assertThat(dto.getFechaCreacion()).isNotNull();
     }
 
     @Test

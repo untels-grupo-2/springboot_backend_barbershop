@@ -7,6 +7,7 @@ import com.diamondbarbershop.apibarbershop.personal.domain.port.out.BarberoRepos
 import com.diamondbarbershop.apibarbershop.shared.domain.port.out.SubidorImagen;
 import com.diamondbarbershop.apibarbershop.util.MensajeError;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,7 @@ public class ActualizarBarberoApplicationService implements ActualizarBarberoUse
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = "barberos", allEntries = true)
     public void actualizar(ActualizarBarberoCommand command) {
         Barbero barbero = barberoRepository.findById(command.barberoId())
                 .orElseThrow(() -> new BarberoNoEncontradoException(MensajeError.BARBERO_NO_ENCONTRADO));

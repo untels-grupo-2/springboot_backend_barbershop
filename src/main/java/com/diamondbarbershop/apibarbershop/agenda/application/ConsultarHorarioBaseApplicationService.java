@@ -5,6 +5,7 @@ import com.diamondbarbershop.apibarbershop.agenda.domain.port.in.ConsultarHorari
 import com.diamondbarbershop.apibarbershop.agenda.domain.port.out.HorarioBarberoBaseRepository;
 import com.diamondbarbershop.apibarbershop.util.DiaSemana;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ public class ConsultarHorarioBaseApplicationService implements ConsultarHorarioB
     private final HorarioBarberoBaseRepository horarioBaseRepository;
 
     @Override
+    @Cacheable("horario-base")
     public Map<DiaSemana, List<HorarioBaseView>> listarAgrupadoPorDia() {
         List<HorarioBaseView> todos = horarioBaseRepository.findAllActivosComoView();
 

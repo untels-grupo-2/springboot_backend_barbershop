@@ -5,6 +5,7 @@ import com.diamondbarbershop.apibarbershop.personal.domain.model.Barbero;
 import com.diamondbarbershop.apibarbershop.personal.domain.port.in.DeshabilitarBarberoUseCase;
 import com.diamondbarbershop.apibarbershop.personal.domain.port.out.BarberoRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ public class DeshabilitarBarberoApplicationService implements DeshabilitarBarber
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = "barberos", allEntries = true)
     public void deshabilitar(Long barberoId) {
         Barbero barbero = barberoRepository.findById(barberoId)
                 .orElseThrow(() -> new BarberoNoEncontradoException(

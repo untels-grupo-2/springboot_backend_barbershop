@@ -5,6 +5,7 @@ import com.diamondbarbershop.apibarbershop.catalogo.domain.port.in.DeshabilitarS
 import com.diamondbarbershop.apibarbershop.catalogo.domain.port.out.ServicioRepository;
 import com.diamondbarbershop.apibarbershop.catalogo.domain.exception.ServicioNoEncontradoException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ public class DeshabilitarServicioApplicationService implements DeshabilitarServi
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = "servicios", allEntries = true)
     public void deshabilitar(Long servicioId) {
         Servicio servicio = servicioRepository.findById(servicioId)
                 .orElseThrow(() -> new ServicioNoEncontradoException(

@@ -2,6 +2,9 @@ spring:
   autoconfigure:
     exclude:
       - org.springframework.boot.actuate.autoconfigure.mail.MailHealthContributorAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+  cache:
+    type: none
   jpa:
     show-sql: true
     hibernate:

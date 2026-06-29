@@ -7,6 +7,8 @@ import com.diamondbarbershop.apibarbershop.personal.domain.port.in.CrearBarberoU
 import com.diamondbarbershop.apibarbershop.personal.domain.port.out.BarberoRepository;
 import com.diamondbarbershop.apibarbershop.shared.domain.port.out.SubidorImagen;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +35,10 @@ public class CrearBarberoApplicationService implements CrearBarberoUseCase {
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "barberos", allEntries = true),
+            @CacheEvict(cacheNames = "horario-base", allEntries = true)
+    })
     public Long crear(CrearBarberoCommand command) {
         String urlImagen = null;
         if (command.imagen() != null) {

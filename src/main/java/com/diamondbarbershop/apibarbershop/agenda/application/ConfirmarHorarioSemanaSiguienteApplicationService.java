@@ -7,6 +7,7 @@ import com.diamondbarbershop.apibarbershop.agenda.domain.port.out.HorarioBarbero
 import com.diamondbarbershop.apibarbershop.agenda.domain.port.out.HorarioInstanciaRepository;
 import com.diamondbarbershop.apibarbershop.util.DiaSemana;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +37,7 @@ public class ConfirmarHorarioSemanaSiguienteApplicationService
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = "horario-base", allEntries = true)
     public void confirmar() {
         LocalDate proximoLunes = LocalDate.now().with(TemporalAdjusters.next(DayOfWeek.MONDAY));
         LocalDate proximoDomingo = proximoLunes.plusDays(6);
