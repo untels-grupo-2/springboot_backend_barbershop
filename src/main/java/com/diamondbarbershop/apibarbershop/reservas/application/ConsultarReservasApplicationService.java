@@ -54,6 +54,13 @@ public class ConsultarReservasApplicationService implements ConsultarReservasUse
         dto.setHorarioRango(view.horarioRango());
         dto.setEstado(view.estado().name());
         dto.setMontoTotal(view.precio());
+        dto.setFechaReserva(view.fechaReserva());
+        dto.setMotivoDescripcion(view.motivoDescripcion());
+        dto.setAdicionales(view.adicionales());
+        dto.setFechaCreacion(view.fechaCreacion());
+        dto.setPrecioServicio(view.precio());
+        dto.setEstRecompensa(view.estRecompensa());
+        dto.setUrlPago(view.urlPago());
         return dto;
     }
 }

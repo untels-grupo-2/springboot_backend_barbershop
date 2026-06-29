@@ -115,7 +115,12 @@ public class ReservaJpaAdapter implements ReservaRepository {
                 jpa.getHorarioRango().getRango(),
                 jpa.getEstado(),
                 jpa.getPrecioServicio(),
-                jpa.getFechaReserva()
+                jpa.getFechaReserva(),
+                jpa.getMotivoDescripcion(),
+                jpa.getAdicionales(),
+                jpa.getFechaCreacion(),
+                jpa.getEstRecompensa(),
+                jpa.getUrlPago()
         );
     }
 
