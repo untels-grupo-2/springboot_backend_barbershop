@@ -4,9 +4,12 @@ import com.diamondbarbershop.apibarbershop.reservas.application.event.ReservaDom
 import com.diamondbarbershop.apibarbershop.reservas.domain.model.Reserva;
 import com.diamondbarbershop.apibarbershop.reservas.domain.port.in.GestionarReservaUseCase;
 import com.diamondbarbershop.apibarbershop.reservas.domain.port.out.ReservaRepository;
+import com.diamondbarbershop.apibarbershop.shared.domain.event.DomainEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * Caso de uso: Gestionar estados de una Reserva.
@@ -36,8 +39,9 @@ public class GestionarReservaApplicationService implements GestionarReservaUseCa
         // Dominio valida la transición: solo CREADA → CONFIRMADA
         reserva.confirmar();
 
-        Reserva guardada = reservaRepository.save(reserva);
-        eventPublisher.publicar(guardada.pullEvents());
+        List<DomainEvent> eventos = reserva.pullEvents();
+        reservaRepository.save(reserva);
+        eventPublisher.publicar(eventos);
     }
 
     @Override
@@ -48,8 +52,9 @@ public class GestionarReservaApplicationService implements GestionarReservaUseCa
         // Dominio valida la transición: solo CONFIRMADA → REALIZADA
         reserva.marcarComoRealizada();
 
-        Reserva guardada = reservaRepository.save(reserva);
-        eventPublisher.publicar(guardada.pullEvents());
+        List<DomainEvent> eventos = reserva.pullEvents();
+        reservaRepository.save(reserva);
+        eventPublisher.publicar(eventos);
     }
 
     @Override
@@ -60,8 +65,9 @@ public class GestionarReservaApplicationService implements GestionarReservaUseCa
         // Dominio valida: no se puede cancelar una REALIZADA
         reserva.cancelar(motivo);
 
-        Reserva guardada = reservaRepository.save(reserva);
-        eventPublisher.publicar(guardada.pullEvents());
+        List<DomainEvent> eventos = reserva.pullEvents();
+        reservaRepository.save(reserva);
+        eventPublisher.publicar(eventos);
     }
 
     // ── Helpers privados ─────────────────────────────────────────────────────────

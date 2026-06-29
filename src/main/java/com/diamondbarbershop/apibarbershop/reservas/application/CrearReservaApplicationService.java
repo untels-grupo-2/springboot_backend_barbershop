@@ -8,7 +8,10 @@ import com.diamondbarbershop.apibarbershop.reservas.domain.model.Precio;
 import com.diamondbarbershop.apibarbershop.reservas.domain.model.Reserva;
 import com.diamondbarbershop.apibarbershop.reservas.domain.port.in.CrearReservaUseCase;
 import com.diamondbarbershop.apibarbershop.reservas.domain.port.out.ReservaRepository;
+import com.diamondbarbershop.apibarbershop.shared.domain.event.DomainEvent;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -78,18 +81,15 @@ public class CrearReservaApplicationService implements CrearReservaUseCase {
                 command.usarRecompensa()
         );
 
-        // 4. Persistir a través del puerto (no del JPA directamente).
+        // 4. Extraer eventos ANTES del save — el save pasa por reconstitute()
+        //    que crea un objeto limpio sin eventos.
+        List<DomainEvent> eventos = reserva.pullEvents();
+
+        // 5. Persistir a través del puerto (no del JPA directamente).
         Reserva guardada = reservaRepository.save(reserva);
 
-        // 5. Publicar eventos emitidos por el aggregate (PB-13).
-        //    El publisher distribuye a todos los listeners registrados:
-        //      - RecompensaListener: si usaRecompensa = true, consume las
-        //        reservas anteriores del cliente.
-        //      - (Futuros) PushNotificacionAdminListener (PB-41),
-        //        NotificacionEmailClienteListener (PB-39).
-        //    Si algún listener falla, hace rollback de TODA la transacción
-        //    (incluye el save de la nueva reserva).
-        eventPublisher.publicar(guardada.pullEvents());
+        // 6. Publicar eventos del aggregate original (PB-13).
+        eventPublisher.publicar(eventos);
 
         return guardada.getId();
     }
